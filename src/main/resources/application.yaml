@@ -1,0 +1,25 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/cjh?userSSL=false@serverTimezone=UTC&characterEncoding=utf-8
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jackson:
+      date-format: yyyy-MM-dd HH:mm:ss.SSS # 包含毫秒
+      time-zone: Asia/Shanghai # 时区
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+logging:
+  level:
+    org.example: DEBUG
+    com.baomidou: debug
+    org.apache.ibatis: trace
+    root: info
+jwt:
+  secret: abcdefghijklmnopqrstuvwxyz1234567890abcdef  # 至少32位长度（比如：abcdefghijklmnopqrstuvwxyz123456）
+  expire: 86400000  # 24小时（毫秒）

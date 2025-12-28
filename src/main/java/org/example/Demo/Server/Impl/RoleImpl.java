@@ -1,0 +1,165 @@
+package org.example.Demo.Server.Impl;
+
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.example.Context.BaseContext;
+import com.example.Util.PublicUtil;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.Demo.Common.AddUserRoleException;
+import org.example.Demo.Common.BaseException;
+import org.example.Demo.Common.PositionException;
+import org.example.Demo.DTO.RoleDTO.AddUserRoleDTO;
+import org.example.Demo.DTO.RoleDTO.DeleteRoleDTO;
+import org.example.Demo.DTO.RoleDTO.RolePageQueryDTO;
+import org.example.Demo.DTO.RoleDTO.RoleSignInDTO;
+import org.example.Demo.OrderTypeEnum.OrderTypeEnum;
+import org.example.Demo.Result.PageResult;
+import org.example.Demo.Result.Result;
+import org.example.Demo.Server.RoleService;
+import org.example.Demo.UserException.AddUserException;
+import org.example.Demo.VO.roleVO.RoleBasicContentVO;
+import org.example.Demo.VO.roleVO.RolesListAllVO;
+import org.example.Demo.entity.Role.Role;
+import org.example.Demo.entity.Role.UserRole;
+import org.example.Demo.mapper.RoleMapper;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class RoleImpl implements RoleService {
+
+    private final RoleMapper roleMapper;
+
+    /**
+     * 查询角色基本信息
+     * @param id
+     * @return
+     */
+    @Override
+    public RoleBasicContentVO getRoleBasicContent(Long id) {
+        RoleBasicContentVO roleBasicContentVO = roleMapper.getRoleBasicContentById(id);
+        if (roleMapper.countRoleId(id)==0) {
+            throw new BaseException("用户详情不存在");
+        }
+        return roleBasicContentVO;
+    }
+
+    /**
+     * 分页查询所有角色
+     * @param rolePageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult<RolesListAllVO> listRole(RolePageQueryDTO rolePageQueryDTO) {
+        PageHelper.startPage(rolePageQueryDTO.getPage(), rolePageQueryDTO.getPageSize());
+        Page<RolesListAllVO> page = roleMapper.pageQueryRole(rolePageQueryDTO);
+        long total = page.getTotal();
+        List<RolesListAllVO> roles = page.getResult();
+        return new PageResult<>(total, roles);
+    }
+
+    /**
+     * 分页查询所有主角色
+     * @param pageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult<RolesListAllVO> pagePrimaRole(RolePageQueryDTO pageQueryDTO) {
+        PageHelper.startPage(pageQueryDTO.getPage(), pageQueryDTO.getPageSize());
+        Page<RolesListAllVO> page = roleMapper.pageQueryPrimaRole(pageQueryDTO);
+        long total = page.getTotal();
+        List<RolesListAllVO> roles = page.getResult();
+        return new PageResult<>(total, roles);
+    }
+
+    /**
+     * 分页查询所有次角色
+     * @param pageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult<RolesListAllVO> pageSecondaryRole(RolePageQueryDTO pageQueryDTO) {
+        if (pageQueryDTO.getSortField() == null) {
+            pageQueryDTO.setSortField("updateTime");
+        }
+        if (pageQueryDTO.getOrderType() == null) {
+            pageQueryDTO.setOrderType(OrderTypeEnum.ASC);
+        }
+        PublicUtil.getPageHelper(new Role(), pageQueryDTO.getSortField(), pageQueryDTO.getOrderType());
+        PageHelper.startPage(pageQueryDTO.getPage(), pageQueryDTO.getPageSize());
+        Page<RolesListAllVO> page = roleMapper.pageQuerySecondaryRole(pageQueryDTO);
+        long total = page.getTotal();
+        List<RolesListAllVO> roles = page.getResult();
+        return new PageResult<>(total, roles);
+    }
+    /**
+     * 新建次角色
+     *
+     * @param roleSignInDTO
+     * @return 角色ID
+     */
+    @Override
+    public Long addRole(RoleSignInDTO roleSignInDTO) {
+        Role role = roleMapper.getRolechinesename(roleSignInDTO.getChineseName());
+        if (role != null) {
+            throw new AddUserException("新建角色失败，角色已存在");
+        }
+        role = new Role();
+        BeanUtils.copyProperties(roleSignInDTO, role);
+        role.setId(IdWorker.getId());
+        role.setCreateTime();
+        role.setUpdateTime();
+        roleMapper.insert(role);
+        return role.getId();
+    }
+
+    /**
+     * 删除角色
+     * @param deleteRoleDTO
+     */
+    @Override
+    public Result deleteRole(DeleteRoleDTO deleteRoleDTO) {
+        Result result = new Result();
+        List<Long> idTwo = deleteRoleDTO.getId();
+        for (int k = 0; k < idTwo.size(); k++) {
+            if (roleMapper.select(idTwo.get(k))) {
+                roleMapper.deleteRole(idTwo.get(k));
+            }
+        }
+        result.setMsg("删除成功");
+        result.setCode(1);
+        return result;
+    }
+
+
+    /**
+     * 为用户添加角色
+     * @param addUserRoleDTO
+     */
+    @Override
+    public void addUserRole(AddUserRoleDTO addUserRoleDTO) {
+        Long userId=addUserRoleDTO.getUserId();
+        Role id=roleMapper.selectUserRoleById(userId);
+        Long targetRoleId = addUserRoleDTO.getRoleId();
+        Role existRole = roleMapper.selectRoleById(targetRoleId);
+        if (existRole == null) {
+            throw new AddUserRoleException("要添加的角色不存在");
+        }
+        int userRoleCount = roleMapper.countRolesByUserId(userId);
+        if (userRoleCount > 0) {
+            throw new AddUserRoleException("当前用户已添加角色，无法重复添加");
+        }
+        UserRole userRole=new UserRole();
+        BeanUtils.copyProperties(addUserRoleDTO,userRole);
+        userRole.setId(addUserRoleDTO.getUserId());
+        userRole.setUserId(userId);
+        userRole.setRoleId(addUserRoleDTO.getRoleId());
+        roleMapper.insertRole(userRole);
+    }
+}

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须与Mapper接口全类名一致 -->
+<mapper namespace="org.example.Demo.mapper.RoleMapper">
+    <select id="pageQueryRole" resultType="org.example.Demo.VO.roleVO.RolesListAllVO">
+        select * from role
+        <where>
+            id
+            <if test="chineseName!=null">
+                and chinese_name like concat("%",
+                #{chineseName},
+                "%"
+                )
+            </if>
+        </where>
+
+    </select>
+    <select id="pageQueryPrimaRole" resultType="org.example.Demo.VO.roleVO.RolesListAllVO">
+        select * from role
+        <where>
+            prima = 1
+            <if test="chineseName!=null">
+                and chinese_name like concat("%",
+                #{chineseName},
+                "%"
+                )
+            </if>
+        </where>
+
+    </select>
+    <select id="pageQuerySecondaryRole" resultType="org.example.Demo.VO.roleVO.RolesListAllVO">
+        select * from role
+        <where>
+        prima = 0
+        <if test="chineseName!=null">
+            and chinese_name like concat("%",
+            #{chineseName},
+            "%"
+            )
+        </if>
+        </where>
+    </select>
+</mapper>
