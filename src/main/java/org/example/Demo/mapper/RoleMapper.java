@@ -5,8 +5,10 @@ import org.apache.ibatis.annotations.*;
 import org.example.Demo.DTO.RoleDTO.AddUserRoleDTO;
 import org.example.Demo.DTO.RoleDTO.RolePageQueryDTO;
 import org.example.Demo.DTO.RoleDTO.UpdateUserRoleDTO;
+import org.example.Demo.DTO.RoleDTO.UserRolePageQueryDTO;
 import org.example.Demo.VO.roleVO.RoleBasicContentVO;
 import org.example.Demo.VO.roleVO.RolesListAllVO;
+import org.example.Demo.VO.roleVO.UserRoleVO;
 import org.example.Demo.annotation.AutoFill;
 import org.example.Demo.entity.Role.Role;
 import org.example.Demo.entity.Role.UserRole;
@@ -142,4 +144,12 @@ public interface RoleMapper {
      * @param updateUserRoleDTO
      */
     void updateUserRole(UpdateUserRoleDTO updateUserRoleDTO);
+
+    /**
+     * 分页查询所有用户角色信息
+     * @param userRolePageQueryDTO
+     * @return
+     */
+    @Select("select * from user_role_name")
+    Page<UserRoleVO> pageQueryUserRole(UserRolePageQueryDTO userRolePageQueryDTO);
 }

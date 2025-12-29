@@ -5,6 +5,7 @@ import org.example.Demo.Result.PageResult;
 import org.example.Demo.Result.Result;
 import org.example.Demo.VO.roleVO.RoleBasicContentVO;
 import org.example.Demo.VO.roleVO.RolesListAllVO;
+import org.example.Demo.VO.roleVO.UserRoleVO;
 
 public interface RoleService {
     RoleBasicContentVO getRoleBasicContent(Long id);
@@ -24,4 +25,6 @@ public interface RoleService {
     Result deleteUserRole(Long id);
 
     void updateUserRole(UpdateUserRoleDTO updateUserRoleDTO);
+
+    PageResult<UserRoleVO> listUserRole(UserRolePageQueryDTO userRolePageQueryDTO);
 }

@@ -15,6 +15,7 @@ import org.example.Demo.Server.RoleService;
 import org.example.Demo.UserException.AddWarehouseException;
 import org.example.Demo.VO.roleVO.RoleBasicContentVO;
 import org.example.Demo.VO.roleVO.RolesListAllVO;
+import org.example.Demo.VO.roleVO.UserRoleVO;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -165,5 +166,22 @@ public class RoleManageController {
     public Result updateWarehouse(@RequestBody UpdateUserRoleDTO updateUserRoleDTO) {
         roleService.updateUserRole(updateUserRoleDTO);
         return Result.success("修改成功", updateUserRoleDTO);
+    }
+    /**
+     * 列出所有用户角色信息
+     *
+     * @Param RolePageQueryDTO
+     * @Return Result<PageResult < RolesListAllVO>>
+     */
+    @PostMapping("/listUserRole")
+    @Operation(summary = "列出所有用户角色")
+    @ApiOperationSupport(author = "陈嘉豪")
+    public Result<PageResult<UserRoleVO>> pageUserRole(@RequestBody UserRolePageQueryDTO userRolePageQueryDTO) {
+        log.info("列出所有用户角色");
+        {
+            //查询所有角色
+            PageResult<UserRoleVO> pageResult = roleService.listUserRole(userRolePageQueryDTO);
+            return Result.success("查询成功", pageResult);
+        }
     }
 }

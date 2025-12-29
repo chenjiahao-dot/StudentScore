@@ -18,6 +18,7 @@ import org.example.Demo.Server.RoleService;
 import org.example.Demo.UserException.AddUserException;
 import org.example.Demo.VO.roleVO.RoleBasicContentVO;
 import org.example.Demo.VO.roleVO.RolesListAllVO;
+import org.example.Demo.VO.roleVO.UserRoleVO;
 import org.example.Demo.entity.Role.Role;
 import org.example.Demo.entity.Role.UserRole;
 import org.example.Demo.mapper.RoleMapper;
@@ -184,5 +185,19 @@ public class RoleImpl implements RoleService {
         UserRole userRole=new UserRole();
         userRole.setRoleId(updateUserRoleDTO.getRoleId());
         roleMapper.updateUserRole(updateUserRoleDTO);
+    }
+
+    /**
+     * 分页查询所有用户角色信息
+     * @param userRolePageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult<UserRoleVO> listUserRole(UserRolePageQueryDTO userRolePageQueryDTO) {
+        PageHelper.startPage(userRolePageQueryDTO.getPage(), userRolePageQueryDTO.getPageSize());
+        Page<UserRoleVO> page = roleMapper.pageQueryUserRole(userRolePageQueryDTO);
+        long total = page.getTotal();
+        List<UserRoleVO> roles = page.getResult();
+        return new PageResult<>(total, roles);
     }
 }
