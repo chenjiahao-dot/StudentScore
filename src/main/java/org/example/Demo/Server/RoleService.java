@@ -1,9 +1,6 @@
 package org.example.Demo.Server;
 
-import org.example.Demo.DTO.RoleDTO.AddUserRoleDTO;
-import org.example.Demo.DTO.RoleDTO.DeleteRoleDTO;
-import org.example.Demo.DTO.RoleDTO.RolePageQueryDTO;
-import org.example.Demo.DTO.RoleDTO.RoleSignInDTO;
+import org.example.Demo.DTO.RoleDTO.*;
 import org.example.Demo.Result.PageResult;
 import org.example.Demo.Result.Result;
 import org.example.Demo.VO.roleVO.RoleBasicContentVO;
@@ -23,4 +20,8 @@ public interface RoleService {
     Result deleteRole(DeleteRoleDTO deleteRoleDTO);
 
     void addUserRole(AddUserRoleDTO addUserRoleDTO);
+
+    Result deleteUserRole(Long id);
+
+    void updateUserRole(UpdateUserRoleDTO updateUserRoleDTO);
 }

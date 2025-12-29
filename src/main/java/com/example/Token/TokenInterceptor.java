@@ -45,13 +45,17 @@ public class TokenInterceptor implements HandlerInterceptor {
         try {
             // 从Token中提取用户ID（解析过程会自动校验签名和格式）
             Long userId = jwtUtil.extractUserId(token);
+            String userName=jwtUtil.getUserNameFromToken(token);
             // 额外校验：Token是否与用户匹配（这里简化处理，可根据业务扩展，比如从数据库查询用户）
             if (!jwtUtil.isTokenValid(token, userId)) {
                 return handleUnauthorized(response, "Token无效");
             }
+
             // 可选：将用户ID存入请求属性，供后续接口使用
+            BaseContext.setCurrentName(userName);
             BaseContext.setCurrentId(userId);
             request.setAttribute("userId", userId);
+
         } catch (Exception e) {
             // 捕获所有Token相关异常（过期、签名错误、解析失败等）
             return handleUnauthorized(response, "Token已过期或无效，请重新登录");
@@ -75,7 +79,7 @@ public class TokenInterceptor implements HandlerInterceptor {
     }
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        // 请求结束后，清除BaseContext中的用户ID
-        BaseContext.remove();
+        BaseContext.removeCurrentId();
+        BaseContext.removeCurrentName(); // 补充清理用户名
     }
 }

@@ -10,10 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.Demo.Common.AddUserRoleException;
 import org.example.Demo.Common.BaseException;
 import org.example.Demo.Common.PositionException;
-import org.example.Demo.DTO.RoleDTO.AddUserRoleDTO;
-import org.example.Demo.DTO.RoleDTO.DeleteRoleDTO;
-import org.example.Demo.DTO.RoleDTO.RolePageQueryDTO;
-import org.example.Demo.DTO.RoleDTO.RoleSignInDTO;
+import org.example.Demo.DTO.RoleDTO.*;
 import org.example.Demo.OrderTypeEnum.OrderTypeEnum;
 import org.example.Demo.Result.PageResult;
 import org.example.Demo.Result.Result;
@@ -161,5 +158,31 @@ public class RoleImpl implements RoleService {
         userRole.setUserId(userId);
         userRole.setRoleId(addUserRoleDTO.getRoleId());
         roleMapper.insertRole(userRole);
+    }
+
+    /**
+     * 删除用户所拥有的角色
+     * @param id
+     */
+    @Override
+    public Result deleteUserRole(Long id) {
+        Result result = new Result<>();
+        if (roleMapper.selectUserRole(id)) {
+            roleMapper.deleteUserRoleById(id);
+            result.setMsg("删除成功");
+            return result;
+        }
+        return result;
+    }
+
+    /**
+     * 修改用户所拥有的角色
+     * @param updateUserRoleDTO
+     */
+    @Override
+    public void updateUserRole(UpdateUserRoleDTO updateUserRoleDTO) {
+        UserRole userRole=new UserRole();
+        userRole.setRoleId(updateUserRoleDTO.getRoleId());
+        roleMapper.updateUserRole(updateUserRoleDTO);
     }
 }

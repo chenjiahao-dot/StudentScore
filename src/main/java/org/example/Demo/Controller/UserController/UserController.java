@@ -125,7 +125,8 @@ public class UserController {
     @ApiOperationSupport(author = "陈嘉豪")
     public Result<String> getCurrentUserName(){
         // 从ThreadLocal中获取当前用户ID
-        String userName = BaseContext.getCurrentName();
+        Long userId=BaseContext.getCurrentId();
+        String userName=userMapper.selectName(userId);
 
         // 校验用户ID是否为空（防止异常情况）
         if (userName == null) {

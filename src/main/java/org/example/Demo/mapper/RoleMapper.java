@@ -4,6 +4,7 @@ import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.*;
 import org.example.Demo.DTO.RoleDTO.AddUserRoleDTO;
 import org.example.Demo.DTO.RoleDTO.RolePageQueryDTO;
+import org.example.Demo.DTO.RoleDTO.UpdateUserRoleDTO;
 import org.example.Demo.VO.roleVO.RoleBasicContentVO;
 import org.example.Demo.VO.roleVO.RolesListAllVO;
 import org.example.Demo.annotation.AutoFill;
@@ -121,4 +122,24 @@ public interface RoleMapper {
      */
     @Select("select count(1) from user_role where user_id = #{userId}")
     int countRolesByUserId(@Param("userId") Long userId);
+    /**
+     * 判断要删除的用户角色id是否存在
+     * @param id
+     * @return
+     */
+    @Select("select user_role.id from user_role where id=#{id}")
+    boolean selectUserRole(Long id);
+
+    /**
+     * 删除用户所拥有的角色
+     * @param id
+     */
+    @Delete("delete  from user_role where id=#{id} ")
+    void deleteUserRoleById(Long id);
+
+    /**
+     * 修改用户所拥有的角色
+     * @param updateUserRoleDTO
+     */
+    void updateUserRole(UpdateUserRoleDTO updateUserRoleDTO);
 }

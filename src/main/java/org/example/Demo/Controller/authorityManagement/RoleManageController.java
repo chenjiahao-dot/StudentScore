@@ -2,14 +2,13 @@ package org.example.Demo.Controller.authorityManagement;
 
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.Demo.DTO.PositionDTO.AddUserPositionDTO;
-import org.example.Demo.DTO.RoleDTO.AddUserRoleDTO;
-import org.example.Demo.DTO.RoleDTO.DeleteRoleDTO;
-import org.example.Demo.DTO.RoleDTO.RolePageQueryDTO;
-import org.example.Demo.DTO.RoleDTO.RoleSignInDTO;
+import org.example.Demo.DTO.RoleDTO.*;
+import org.example.Demo.DTO.WarehouseDTO.UpdateWarehouseDTO;
 import org.example.Demo.Result.PageResult;
 import org.example.Demo.Result.Result;
 import org.example.Demo.Server.RoleService;
@@ -136,5 +135,35 @@ public class RoleManageController {
     public Result addUserPosition(@RequestBody AddUserRoleDTO addUserRoleDTO) throws AddWarehouseException {
         roleService.addUserRole(addUserRoleDTO);
         return Result.success("身份添加成功");
+    }
+    /**
+     * 删除用户所拥有的角色
+     *
+     * @Param id
+     * @Return
+     */
+    @PostMapping("/deleteUserRole/{id}")
+    @Operation(summary = "删除用户所拥有的角色")
+    @ApiOperationSupport(author = "陈嘉豪")
+    public Result deleteUserRole(@PathVariable @Parameter(description = "要删除的用户角色的id") Long id) {
+        try {
+            roleService.deleteUserRole(id);
+            return Result.success("删除成功");
+        } catch (Exception e) {
+            return Result.error("删除失败，可能是用户无角色");
+        }
+    }
+    /**
+     * 对用户所拥有的角色进行修改
+     *
+     * @param updateUserRoleDTO
+     * @return
+     */
+    @PostMapping("/updateUserRole")
+    @Operation(summary = "对用户所拥有的角色进行修改")
+    @ApiOperationSupport(author = "陈嘉豪")
+    public Result updateWarehouse(@RequestBody UpdateUserRoleDTO updateUserRoleDTO) {
+        roleService.updateUserRole(updateUserRoleDTO);
+        return Result.success("修改成功", updateUserRoleDTO);
     }
 }

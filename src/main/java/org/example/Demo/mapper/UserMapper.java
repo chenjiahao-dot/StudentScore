@@ -73,4 +73,11 @@ public interface UserMapper {
      */
     @Select("select * from user")
     List<User> selectAllUser();
+
+    /**
+     * 查询当前用户姓名
+     * @return
+     */
+    @Select("select user_name from user where id=#{userId}")
+    String selectName(Long userId);
 }

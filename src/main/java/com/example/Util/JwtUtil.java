@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 @Component
@@ -32,11 +34,16 @@ public class JwtUtil {
      * @param userId 存入Token的用户ID
      * @return 生成的Token
      */
-    public String generateToken(Long userId) {
+    public String generateToken(Long userId,String userName) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
+        claims.put("userName", userName); // 存入用户名，key与提取时一致
+
         return Jwts.builder()
-                .claim("userId", userId)
+                .setClaims(claims)
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
-                .signWith(getSignInKey())
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
@@ -110,4 +117,18 @@ public class JwtUtil {
         return claims.get("userId", Long.class);
     }
 
+    /**
+     * 从Token中提取用户名
+     */
+    public String getUserNameFromToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.get("userName", String.class); // 提取用户名
+        } catch (Exception e) {
+            return null; // Token无效/过期返回null
+        }
+    }
 }
