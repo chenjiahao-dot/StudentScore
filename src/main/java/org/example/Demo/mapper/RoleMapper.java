@@ -12,6 +12,7 @@ import org.example.Demo.VO.roleVO.UserRoleVO;
 import org.example.Demo.annotation.AutoFill;
 import org.example.Demo.entity.Role.Role;
 import org.example.Demo.entity.Role.UserRole;
+import org.example.Demo.entity.Role.UserRoleName;
 import org.example.Demo.enumeration.OperationType;
 
 @Mapper
@@ -152,4 +153,39 @@ public interface RoleMapper {
      */
     @Select("select * from user_role_name")
     Page<UserRoleVO> pageQueryUserRole(UserRolePageQueryDTO userRolePageQueryDTO);
+
+    /**
+     * 根据id查询用户姓名
+     * @param userId
+     * @return
+     */
+    @Select("select user_name from user where id=#{userId}")
+    String selectUserName(Long userId);
+
+    /**
+     * 根据id查询用户角色姓名
+     * @param roleId
+     * @return
+     */
+    String selectRoleName(Long roleId);
+
+    /**
+     * 根据id查询用户角色的中文名
+     * @param roleId
+     * @return
+     */
+    String selectRoleChineseName(Long roleId);
+
+    /**
+     * 根据id查询用户简介
+     * @param roleId
+     * @return
+     */
+    String selectComment(Long roleId);
+
+    /**
+     * 添加用户角色信息
+     * @param userRoleName
+     */
+    void insertUserRole(UserRoleName userRoleName);
 }

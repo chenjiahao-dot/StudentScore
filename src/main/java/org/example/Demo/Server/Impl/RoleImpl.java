@@ -21,10 +21,12 @@ import org.example.Demo.VO.roleVO.RolesListAllVO;
 import org.example.Demo.VO.roleVO.UserRoleVO;
 import org.example.Demo.entity.Role.Role;
 import org.example.Demo.entity.Role.UserRole;
+import org.example.Demo.entity.Role.UserRoleName;
 import org.example.Demo.mapper.RoleMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -143,7 +145,11 @@ public class RoleImpl implements RoleService {
     @Override
     public void addUserRole(AddUserRoleDTO addUserRoleDTO) {
         Long userId=addUserRoleDTO.getUserId();
-        Role id=roleMapper.selectUserRoleById(userId);
+        Long roleId=addUserRoleDTO.getRoleId();
+        String userName=roleMapper.selectUserName(userId);
+        String roleName=roleMapper.selectRoleName(roleId);
+        String comment=roleMapper.selectComment(roleId);
+        String roleChineseName=roleMapper.selectRoleChineseName(roleId);
         Long targetRoleId = addUserRoleDTO.getRoleId();
         Role existRole = roleMapper.selectRoleById(targetRoleId);
         if (existRole == null) {
@@ -159,6 +165,22 @@ public class RoleImpl implements RoleService {
         userRole.setUserId(userId);
         userRole.setRoleId(addUserRoleDTO.getRoleId());
         roleMapper.insertRole(userRole);
+
+        UserRoleName userRoleName=new UserRoleName();
+        BeanUtils.copyProperties(addUserRoleDTO,userRoleName);
+        userRoleName.setUserId(userId);
+        userRoleName.setRoleId(addUserRoleDTO.getRoleId());
+        userRoleName.setUserName(userName);
+        userRoleName.setRoleName(roleName);
+        userRoleName.setRoleChineseName(roleChineseName);
+        userRoleName.setComment(comment);
+        userRoleName.setCreateTime(new Date());
+        userRoleName.setUpdateTime(new Date());
+        userRoleName.setCreateUser(userId);
+        userRoleName.setUpdateUser(userId);
+        userRoleName.setCreateUserName(userName);
+        userRoleName.setUpdateUserName(userName);
+        roleMapper.insertUserRole(userRoleName);
     }
 
     /**

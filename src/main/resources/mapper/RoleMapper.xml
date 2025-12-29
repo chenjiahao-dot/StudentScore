@@ -5,6 +5,17 @@
 
 <!-- namespace必须与Mapper接口全类名一致 -->
 <mapper namespace="org.example.Demo.mapper.RoleMapper">
+    <insert id="insertUserRole">
+        INSERT INTO user_role_name (
+        user_id, role_id,user_name, role_name, role_chinese_name,comment,
+        create_time, create_user, update_time, update_user,
+        create_user_name, update_user_name
+        ) VALUES (
+        #{userId},#{roleId}, #{userName}, #{roleName}, #{roleChineseName},#{comment},
+        #{createTime}, #{createUser}, #{updateTime}, #{updateUser},
+        #{createUserName}, #{updateUserName}
+        )
+    </insert>
     <update id="updateUserRole">
         update user_role
         <set>
@@ -51,5 +62,20 @@
             )
         </if>
         </where>
+    </select>
+    <select id="selectRoleName" resultType="java.lang.String">
+        SELECT name
+        FROM role
+        WHERE id = #{roleId}
+    </select>
+    <select id="selectRoleChineseName" resultType="java.lang.String">
+        SELECT chinese_name
+        FROM role
+        WHERE id = #{roleId}
+    </select>
+    <select id="selectComment" resultType="java.lang.String">
+        SELECT comment
+        FROM role
+        WHERE id = #{roleId}
     </select>
 </mapper>

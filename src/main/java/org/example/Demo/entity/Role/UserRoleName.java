@@ -18,7 +18,7 @@ public class UserRoleName {
     @Schema(description = "用户姓名")
     private String userName;
     @Schema(description = "角色姓名")
-    private PrimaryRoleEnum roleName;
+    private String roleName;
     @Schema(description = "角色中文名")
     private String roleChineseName;
     @Schema(description = "角色简介")
