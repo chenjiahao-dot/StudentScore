@@ -21,5 +21,5 @@ logging:
     org.apache.ibatis: trace
     root: info
 jwt:
-  secret: abcdefghijklmnopqrstuvwxyz1234567890abcdef  # 至少32位长度（比如：abcdefghijklmnopqrstuvwxyz123456）
-  expire: 86400000  # 24小时（毫秒）
+  secret: "abcdefghijklmnopqrstuvwxyz1234567890abcdefghi" # 32+ 英文字符（UTF-8 32+字节，满足 HS256 要求）
+  expire: 86400000 # Token 过期时间：24小时（单位：毫秒）

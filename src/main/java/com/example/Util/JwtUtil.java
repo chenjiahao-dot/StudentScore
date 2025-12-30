@@ -4,10 +4,12 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,16 +36,15 @@ public class JwtUtil {
      * @param userId 存入Token的用户ID
      * @return 生成的Token
      */
-    public String generateToken(Long userId,String userName) {
+    public String generateToken(Long userId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
-        claims.put("userName", userName); // 存入用户名，key与提取时一致
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes(StandardCharsets.UTF_8))
                 .compact();
     }
 
@@ -99,6 +100,7 @@ public class JwtUtil {
                 .getBody();
         return Long.parseLong(claims.getSubject());
     }
+
     /**
      * 解析token，获取当前用户的ID（核心方法）
      * @param token 前端传递的JWT token
@@ -117,18 +119,4 @@ public class JwtUtil {
         return claims.get("userId", Long.class);
     }
 
-    /**
-     * 从Token中提取用户名
-     */
-    public String getUserNameFromToken(String token) {
-        try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey(secretKey)
-                    .parseClaimsJws(token)
-                    .getBody();
-            return claims.get("userName", String.class); // 提取用户名
-        } catch (Exception e) {
-            return null; // Token无效/过期返回null
-        }
-    }
 }

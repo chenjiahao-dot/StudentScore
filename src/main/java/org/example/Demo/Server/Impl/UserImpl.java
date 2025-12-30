@@ -92,10 +92,9 @@ public class UserImpl implements UserService {
         if (!inputPwdEncrypted.equals(newuser.getPassword())) {
             throw new RuntimeException("密码错误");
         }
-        BaseContext.setCurrentName(newuser.getUserName());
         BaseContext.setCurrentId(newuser.getId());
         // 4. 生成token并返回
-        return jwtUtil.generateToken(newuser.getId(), newuser.getUserName());
+        return jwtUtil.generateToken(newuser.getId());
     }
 
     /**

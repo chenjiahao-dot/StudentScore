@@ -5,6 +5,9 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.example.Demo.DTO.PositionDTO.PositionPageQueryDTO;
+import org.example.Demo.Enummerate.PositionEnum;
+import org.example.Demo.Enummerate.PositionIdentityEnum;
+import org.example.Demo.Server.Impl.PositionImpl;
 import org.example.Demo.VO.PositionVO.PositionPageQueryVO;
 import org.example.Demo.VO.PositionVO.PositionVO;
 import org.example.Demo.entity.Position.Position;
@@ -73,4 +76,12 @@ public interface PositionMapper {
      */
     @Select("select count(*) from position where id=#{id} ")
     int countUserPositionById(Long id);
+
+    /**
+     * 查询当前用户的岗位
+     * @param userId
+     * @return
+     */
+    @Select("select identity_name from position where id=#{userId} ")
+    PositionIdentityEnum selectPositionidentityById(Long userId);
 }

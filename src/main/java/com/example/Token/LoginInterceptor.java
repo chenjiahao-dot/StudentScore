@@ -25,9 +25,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         String token = authorization.substring(7).trim();
         // 调用注入对象的parseToken方法（不是static方法）
         Long userId = jwtUtil.getUserIdFromToken(token);
-        String userName = jwtUtil.getUserNameFromToken(token);
         BaseContext.setCurrentId(userId);
-        BaseContext.setCurrentName(userName);
         return true;
     }
 

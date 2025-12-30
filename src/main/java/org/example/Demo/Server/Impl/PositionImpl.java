@@ -5,11 +5,14 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.Demo.Common.AddUserRoleException;
 import org.example.Demo.Common.BaseException;
 import org.example.Demo.Common.PositionException;
 import org.example.Demo.DTO.PositionDTO.AddUserPositionDTO;
 import org.example.Demo.DTO.PositionDTO.PositionPageQueryDTO;
 import org.example.Demo.DTO.PositionDTO.UpdateUserPositionDTO;
+import org.example.Demo.Enummerate.PositionEnum;
+import org.example.Demo.Enummerate.PositionIdentityEnum;
 import org.example.Demo.Result.PageResult;
 import org.example.Demo.Result.Result;
 import org.example.Demo.Server.PositionService;
@@ -37,24 +40,25 @@ public class PositionImpl implements PositionService {
     public void addUserPosition(AddUserPositionDTO addUserPositionDTO) {
         Long userId = BaseContext.getCurrentId();
         // 新增：校验用户是否已存在岗位
-        Position existing = positionMapper.selectUserById(userId);
+        Position existing = positionMapper.selectUserById(addUserPositionDTO.getUserId());
+        PositionIdentityEnum positionidentityEnum=positionMapper.selectPositionidentityById(userId);
         if (existing != null) {
             throw new PositionException("当前用户已添加岗位，无法重复添加");
         }
-        String user=positionMapper.selectUserId(userId);
-        Position position = new Position();
-        BeanUtils.copyProperties(addUserPositionDTO, position);
-        position.setUserId(BaseContext.getCurrentId());
-        position.setCreateUser(userId);
-        position.setCreateUserName(user);
-        position.setUpdateUser(userId);
-        position.setUpdateUserName(user);
-        try{
+        if (positionidentityEnum==PositionIdentityEnum.BOARD_OF_DIRECTORS){
+            String user=positionMapper.selectUserId(userId);
+            Position position = new Position();
+            BeanUtils.copyProperties(addUserPositionDTO, position);
+            position.setUserId(addUserPositionDTO.getUserId());
+            position.setCreateUser(userId);
+            position.setCreateUserName(user);
+            position.setUpdateUser(userId);
+            position.setUpdateUserName(user);
             position.setCreateTime();
             position.setUpdateTime();
             positionMapper.insert(position);
-        }catch (Exception e){
-            throw new PositionException("添加岗位失败,原因:"+e.getMessage());
+        }else {
+            throw new AddUserRoleException("无权限添加角色");
         }
 
     }
@@ -80,16 +84,21 @@ public class PositionImpl implements PositionService {
     @Override
     public void updateUserPosition(UpdateUserPositionDTO updateUserPositionDTO) {
         Long userId = BaseContext.getCurrentId();
-        String user=positionMapper.selectUserId(userId);
-        Position position = new Position();
-        BeanUtils.copyProperties(updateUserPositionDTO, position);
-        position.setCreateUser(userId);
-        position.setUpdateUser(userId);
-        position.setCreateTime();
-        position.setUpdateTime();
-        position.setUpdateUserName(user);
-        position.setCreateUserName(user);
-        positionMapper.updateUserPosition(position);
+        PositionIdentityEnum positionidentityEnum = positionMapper.selectPositionidentityById(userId);
+        if (positionidentityEnum == PositionIdentityEnum.BOARD_OF_DIRECTORS) {
+            String user = positionMapper.selectUserId(userId);
+            Position position = new Position();
+            BeanUtils.copyProperties(updateUserPositionDTO, position);
+            position.setCreateUser(userId);
+            position.setUpdateUser(userId);
+            position.setCreateTime();
+            position.setUpdateTime();
+            position.setUpdateUserName(user);
+            position.setCreateUserName(user);
+            positionMapper.updateUserPosition(position);
+        }else {
+            throw new AddUserRoleException("无权限修改角色");
+        }
     }
 
     /**
