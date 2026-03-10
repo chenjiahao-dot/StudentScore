@@ -11,6 +11,7 @@ import org.example.Demo.Common.AddUserRoleException;
 import org.example.Demo.Common.BaseException;
 import org.example.Demo.Common.PositionException;
 import org.example.Demo.DTO.RoleDTO.*;
+import org.example.Demo.Enummerate.PrimaryRoleEnum;
 import org.example.Demo.OrderTypeEnum.OrderTypeEnum;
 import org.example.Demo.Result.PageResult;
 import org.example.Demo.Result.Result;
@@ -198,16 +199,7 @@ public class RoleImpl implements RoleService {
         return result;
     }
 
-    /**
-     * 修改用户所拥有的角色
-     * @param updateUserRoleDTO
-     */
-    @Override
-    public void updateUserRole(UpdateUserRoleDTO updateUserRoleDTO) {
-        UserRole userRole=new UserRole();
-        userRole.setRoleId(updateUserRoleDTO.getRoleId());
-        roleMapper.updateUserRole(updateUserRoleDTO);
-    }
+
 
     /**
      * 分页查询所有用户角色信息

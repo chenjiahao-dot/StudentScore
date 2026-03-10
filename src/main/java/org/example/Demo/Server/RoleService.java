@@ -24,7 +24,6 @@ public interface RoleService {
 
     Result deleteUserRole(Long id);
 
-    void updateUserRole(UpdateUserRoleDTO updateUserRoleDTO);
 
     PageResult<UserRoleVO> listUserRole(UserRolePageQueryDTO userRolePageQueryDTO);
 }

@@ -154,19 +154,7 @@ public class RoleManageController {
             return Result.error("删除失败，可能是用户无角色");
         }
     }
-    /**
-     * 对用户所拥有的角色进行修改
-     *
-     * @param updateUserRoleDTO
-     * @return
-     */
-    @PostMapping("/updateUserRole")
-    @Operation(summary = "对用户所拥有的角色进行修改")
-    @ApiOperationSupport(author = "陈嘉豪")
-    public Result updateWarehouse(@RequestBody UpdateUserRoleDTO updateUserRoleDTO) {
-        roleService.updateUserRole(updateUserRoleDTO);
-        return Result.success("修改成功", updateUserRoleDTO);
-    }
+
     /**
      * 列出所有用户角色信息
      *

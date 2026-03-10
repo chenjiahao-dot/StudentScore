@@ -41,7 +41,7 @@ public class PositionImpl implements PositionService {
         Long userId = BaseContext.getCurrentId();
         // 新增：校验用户是否已存在岗位
         Position existing = positionMapper.selectUserById(addUserPositionDTO.getUserId());
-        PositionIdentityEnum positionidentityEnum=positionMapper.selectPositionidentityById(userId);
+        PositionIdentityEnum positionidentityEnum=positionMapper.selectPositionIdentityById(userId);
         if (existing != null) {
             throw new PositionException("当前用户已添加岗位，无法重复添加");
         }
@@ -84,7 +84,7 @@ public class PositionImpl implements PositionService {
     @Override
     public void updateUserPosition(UpdateUserPositionDTO updateUserPositionDTO) {
         Long userId = BaseContext.getCurrentId();
-        PositionIdentityEnum positionidentityEnum = positionMapper.selectPositionidentityById(userId);
+        PositionIdentityEnum positionidentityEnum = positionMapper.selectPositionIdentityById(userId);
         if (positionidentityEnum == PositionIdentityEnum.BOARD_OF_DIRECTORS) {
             String user = positionMapper.selectUserId(userId);
             Position position = new Position();

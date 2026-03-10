@@ -6,6 +6,7 @@ import org.example.Demo.DTO.RoleDTO.AddUserRoleDTO;
 import org.example.Demo.DTO.RoleDTO.RolePageQueryDTO;
 import org.example.Demo.DTO.RoleDTO.UpdateUserRoleDTO;
 import org.example.Demo.DTO.RoleDTO.UserRolePageQueryDTO;
+import org.example.Demo.Enummerate.PrimaryRoleEnum;
 import org.example.Demo.VO.roleVO.RoleBasicContentVO;
 import org.example.Demo.VO.roleVO.RolesListAllVO;
 import org.example.Demo.VO.roleVO.UserRoleVO;
@@ -188,4 +189,6 @@ public interface RoleMapper {
      * @param userRoleName
      */
     void insertUserRole(UserRoleName userRoleName);
+
+
 }

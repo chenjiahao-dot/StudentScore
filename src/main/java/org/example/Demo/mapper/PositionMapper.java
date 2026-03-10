@@ -83,5 +83,5 @@ public interface PositionMapper {
      * @return
      */
     @Select("select identity_name from position where id=#{userId} ")
-    PositionIdentityEnum selectPositionidentityById(Long userId);
+    PositionIdentityEnum selectPositionIdentityById(Long userId);
 }
