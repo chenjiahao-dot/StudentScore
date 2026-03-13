@@ -30,17 +30,15 @@ public interface UserMapper {
      * @param newuser
      */
     @AutoFill(OperationType.INSERT)
-    @Insert("insert into user ( name, user_name,user_type_enum,sex_enum,status_enum,number, mobile, " +
-            "mail, password, create_time, update_time) " +
-            "VALUE ( #{name}, #{userName} ,#{userTypeEnum},#{sexEnum},#{statusEnum}, #{number}, #{mobile}," +
-            "#{mail}, #{password}, #{createTime}, #{updateTime})")
+    @Insert("insert into user ( id,name, user_name,user_type_enum,mobile,mail,password,sex_enum,class_id) " +
+            "VALUES ( #{id}, #{name} ,#{userName},#{userTypeEnum}, #{mobile},#{mail},#{password}, #{sexEnum},#{classId} )")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void insertUser(newUser newuser);
     @Select("SELECT * FROM user WHERE mail = #{mail}")
     newUser selectByMail(String mail);
 
     // 根据手机号查询用户
-    @Select("SELECT * FROM user WHERE mobile = #{mobile}")
+    @Select("SELECT * FROM user WHERE telephone = #{telephone}")
     newUser selectByMobile(String mobile);
 
     Page<UserMessageVO> pageUserMessage(UserPageQueryDTO pageQueryDTO);

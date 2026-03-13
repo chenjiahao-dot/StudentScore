@@ -14,10 +14,9 @@ import org.example.Demo.DTO.UserDTO.UpdateUserStatus;
 import org.example.Demo.DTO.UserDTO.UserPageQueryDTO;
 import org.example.Demo.DTO.UserDTO.UserRePasswordDTO;
 import org.example.Demo.DTO.WarehouseDTO.UserSignInDTO;
-import org.example.Demo.Enummerate.StatusEnum;
 import org.example.Demo.Result.PageResult;
 import org.example.Demo.Result.Result;
-import org.example.Demo.Server.UserService;
+import org.example.Demo.Server.UserServer;
 import org.example.Demo.UserException.AddUserException;
 import org.example.Demo.VO.UserVO.UserMessageVO;
 import org.example.Demo.entity.User.newUser;
@@ -32,7 +31,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class UserImpl implements UserService {
+public class UserImpl implements UserServer {
     private final UserMapper userMapper;
     @Resource
     private JwtUtil jwtUtil;
@@ -43,24 +42,17 @@ public class UserImpl implements UserService {
      */
     @Override
     public void signIn(UserSignInDTO userSignInDTO) {
-        newUser newUser=userMapper.getByMail(userSignInDTO.getMail());
-        if(newUser!=null){
-            throw new AddUserException("用户已存在");
-        }
-        newUser =new newUser();
+        newUser newUser =new newUser();
         BeanUtils.copyProperties(userSignInDTO,newUser);
         newUser.setPassword(DigestUtils.md5DigestAsHex(userSignInDTO.getPassword().getBytes()));
-        newUser.setNumber(userSignInDTO.getNumber());
         newUser.setMobile(userSignInDTO.getMobile());
         newUser.setUserName(newUser.getName());
         newUser.setSexEnum(userSignInDTO.getSexEnum());
-        newUser.setStatusEnum(StatusEnum.START);
         newUser.setUserTypeEnum(userSignInDTO.getUserTypeEnum());
-        newUser.setPositionEnum(userSignInDTO.getPositionEnum());
-        newUser.setPositionIdentityEnum(userSignInDTO.getPositionIdentityEnum());
+        newUser.setSexEnum(userSignInDTO.getSexEnum());
+        newUser.setClassId(userSignInDTO.getClassId());
+        newUser.setMail(userSignInDTO.getMail());
         try{
-            newUser.setCreateTime();
-            newUser.setUpdateTime();
             userMapper.insertUser(newUser);
         }catch (Exception e){
             throw new AddUserException("新增用户失败，原因:"+e.getMessage());

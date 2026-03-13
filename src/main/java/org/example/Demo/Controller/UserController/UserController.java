@@ -17,11 +17,8 @@ import org.example.Demo.DTO.UserDTO.UserExcelDTO;
 import org.example.Demo.DTO.UserDTO.UserRePasswordDTO;
 import org.example.Demo.DTO.WarehouseDTO.UserSignInDTO;
 import org.example.Demo.Result.Result;
-import org.example.Demo.Server.UserService;
-import org.example.Demo.entity.Position.ExcelPosition;
-import org.example.Demo.entity.Position.Position;
+import org.example.Demo.Server.UserServer;
 import org.example.Demo.entity.User.User;
-import org.example.Demo.mapper.UserManageMapper;
 import org.example.Demo.mapper.UserMapper;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -40,9 +37,8 @@ import java.util.stream.Collectors;
 @CrossOrigin
 @RequiredArgsConstructor
 public class UserController {
-    private final UserService userService;
+    private final UserServer userServer;
     private final UserMapper userMapper;
-    private final UserManageMapper userManageMapper;
     /**
      * 用户注册
      * @param userSignInDTO
@@ -53,7 +49,7 @@ public class UserController {
     @ApiOperationSupport(author = "陈嘉豪")
     public Result signIn(@RequestBody UserSignInDTO userSignInDTO) {
         log.info("开始注册用户{}", userSignInDTO.getMail());
-        userService.signIn(userSignInDTO);
+        userServer.signIn(userSignInDTO);
         log.info("新增用户成功");
         return Result.success("注册成功", null);
     }
@@ -68,7 +64,7 @@ public class UserController {
     @ApiOperationSupport(author = "陈嘉豪")// 接口文档描述
     public Map<String, String> login(@Validated @RequestBody LoginRequestUserDTO loginRequestUserDTO) {
         // 调用服务层获取token
-        String token = userService.login(loginRequestUserDTO);
+        String token = userServer.login(loginRequestUserDTO);
 
         // 构建返回结果（包含token）
         Map<String, String> result = new HashMap<>();
@@ -88,7 +84,7 @@ public class UserController {
     @ApiOperationSupport(author = "陈嘉豪")
     public Result rePassword(@RequestBody UserRePasswordDTO userRePasswordDTO) {
         log.info("用户{}尝试修改密码", BaseContext.getCurrentId());
-        userService.rePassword(userRePasswordDTO);
+        userServer.rePassword(userRePasswordDTO);
         log.info("用户{}修改密码成功", BaseContext.getCurrentId());
         return Result.success("修改成功", null);
     }
@@ -147,7 +143,7 @@ public class UserController {
     @ApiOperationSupport(author = "陈嘉豪")
     public Result updateUserStatus(@RequestBody UpdateUserStatus updateUserStatus) {
         try {
-            userService.updateUserStatus(updateUserStatus);
+            userServer.updateUserStatus(updateUserStatus);
             return Result.success("用户状态修改成功");
         } catch (RuntimeException e) {
             // 捕获业务异常，返回错误信息

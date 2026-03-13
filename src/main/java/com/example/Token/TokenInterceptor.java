@@ -35,7 +35,7 @@ public class TokenInterceptor implements HandlerInterceptor {
         }
 
         // 2. 从请求头获取Token（约定格式：Authorization: Bearer {token}）
-        String token = request.getHeader("Authorization");
+        String token = request.getHeader("token");
         if (token == null ) {
             // 无Token或格式错误，返回401未授权
             return handleUnauthorized(response, "请先登录，或传入正确格式的Token");

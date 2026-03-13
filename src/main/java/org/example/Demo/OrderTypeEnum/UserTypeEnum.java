@@ -15,9 +15,9 @@ public enum UserTypeEnum {
     /**
      * 用户类型枚举类
      */
-
-    STUDENT("学生", "STUDENT"),
-    TEACHER("老师", "TEACHER");
+    ADMIN("管理员", "ADMIN"),
+    TEACHER("老师", "TEACHER"),
+    STUDENT("学生", "STUDENT");
 
     private final String type;
     private final String enumName;

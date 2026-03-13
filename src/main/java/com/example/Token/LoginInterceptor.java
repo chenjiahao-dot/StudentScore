@@ -18,7 +18,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     private JwtUtil jwtUtil;
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String authorization = request.getHeader("Authorization");
+        String authorization = request.getHeader("token");
         if (authorization == null) {
             throw new RuntimeException("用户未登录，请先登录");
         }

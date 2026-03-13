@@ -9,7 +9,7 @@ import org.example.Demo.Result.PageResult;
 import org.example.Demo.Result.Result;
 import org.example.Demo.VO.UserVO.UserMessageVO;
 
-public interface UserService {
+public interface UserServer {
     void signIn(UserSignInDTO userSignInDTO);
 
 
