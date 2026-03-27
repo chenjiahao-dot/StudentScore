@@ -4,7 +4,7 @@ package org.example.Demo.annotation;
 
 
 
-import org.example.Demo.enumeration.OperationType;
+import com.common.enumeration.OperationType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

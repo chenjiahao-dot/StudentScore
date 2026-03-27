@@ -1,7 +1,7 @@
 package org.example.Demo.config;
 
-import com.example.Token.TokenInterceptor;
-import com.example.Util.JwtUtil;
+import org.example.Demo.Token.TokenInterceptor;
+import com.common.Util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

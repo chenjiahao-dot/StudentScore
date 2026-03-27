@@ -1,6 +1,6 @@
 package org.example.Demo.config;
 
-import com.example.Token.TokenInterceptor;
+import org.example.Demo.Token.TokenInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

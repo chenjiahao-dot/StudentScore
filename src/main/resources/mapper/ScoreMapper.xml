@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须与Mapper接口全类名一致 -->
+<mapper namespace="org.example.Demo.mapper.ScoreMapper">
+    <update id="updateStudentScore">
+        update score
+        <set>
+            <if test="score!=null">score=#{score}</if>
+        </set>
+        WHERE student_id = #{studentId}
+        AND course_id = #{courseId}
+        AND exam_type = #{examType}
+    </update>
+    <select id="pageScore" resultType="org.example.Demo.VO.Score.scoreVO">
+        select * from score
+        <where>
+            <if test="studentId!=null">student_id=#{studentId},</if>
+            <if test="courseId!=null">course_id=#{courseId}</if>
+        </where>
+    </select>
+</mapper>

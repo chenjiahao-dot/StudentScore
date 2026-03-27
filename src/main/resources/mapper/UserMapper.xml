@@ -6,7 +6,7 @@
 <!-- namespace必须与Mapper接口全类名一致 -->
 <mapper namespace="org.example.Demo.mapper.UserMapper">
 
-    <select id="pageUserMessage" resultType="org.example.Demo.VO.UserVO.UserMessageVO">
+    <select id="pageUserMessage" resultType="org.example.Demo.VO.User.userMessageVO">
         select * from user
         <where>
             <if test="name != null">
@@ -14,25 +14,13 @@
             </if>
         </where>
     </select>
-    <select id="selectList" resultType="org.example.Demo.entity.User.User">
+    <select id="selectList" resultType="org.example.Demo.entity.user">
         select * from user
     </select>
 
 
-    <update id="update">
-        update user
-        <set>
-            <if test="name != null">name=#{name},</if>
-            <if test="mail != null">mail=#{mail},</if>
-            <if test="number != null">number=#{number},</if>
-            <if test="mobile != null">mobile=#{mobile},</if>
-            <if test="password != null">password=#{password},</if>
-        </set>
-        <where>
-            id=#{id}
-        </where>
-    </update>
-    <update id="updateUserStatus" parameterType="org.example.Demo.DTO.UserDTO.UpdateUserStatus">
+
+    <update id="updateUserStatus" parameterType="org.example.Demo.DTO.User.UpdateUserStatus">
         UPDATE `user`
         SET status_enum = #{status}
         WHERE id = #{id}
