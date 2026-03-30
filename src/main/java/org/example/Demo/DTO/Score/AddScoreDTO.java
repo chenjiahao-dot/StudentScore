@@ -16,5 +16,6 @@ public class AddScoreDTO {
     private String score;
     @Schema(description = "考试类型")
     private ExamTypeEnum examType;
-
+    @Schema(description = "学期ID")
+    private Long semesterId;
 }

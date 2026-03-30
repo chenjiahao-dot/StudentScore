@@ -46,6 +46,7 @@ public class ScoreImpl implements ScoreServer {
         UserTypeEnum userTypeEnumId=scoreMapper.selectUserType(addScoreDTO.getStudentId());
         Long studentId = Long.valueOf(addScoreDTO.getStudentId());
         Long courseId = Long.valueOf(addScoreDTO.getCourseId());
+        Long semesterId=scoreMapper.selectSemesterById(addScoreDTO.getSemesterId());
         ExamTypeEnum examType = addScoreDTO.getExamType();
 
         // 判断这个学生 + 这门课 + 这个考试类型（期中/期末）是否已经存在
@@ -54,7 +55,10 @@ public class ScoreImpl implements ScoreServer {
             throw new AddUserException("该学生此课程的" + (examType == ExamTypeEnum.MIDTERM ? "期中" : "期末") + "成绩已存在，无法重复添加");
         }
         if (userTypeEnumId == null) {
-            throw new AddUserException("该用户不存在");
+            throw new AddUserException("该用户不存在，请重新选择");
+        }
+        if (semesterId == null) {
+            throw new AddUserException("学期不存在，请重新选择");
         }
         if (userTypeEnumId != UserTypeEnum.STUDENT) {
             throw new AddUserException("该用户不是学生");

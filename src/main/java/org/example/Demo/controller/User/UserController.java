@@ -195,55 +195,55 @@ public class UserController {
 
 
 
-        /**
-         * 导出所有用户数据到Excel
-         * @param response HTTP响应对象，用于输出Excel流
-         * @throws Exception 异常抛出（实际项目可自定义全局异常处理）
-         */
-        @GetMapping("/exportData")
-        @Operation(summary = "导出数据")
-        @ApiOperationSupport(author = "陈嘉豪")
-        public void exportUserExcel(HttpServletResponse response) throws Exception {
-            // 1. 配置响应头：告诉浏览器这是Excel文件，需要下载，解决中文文件名乱码
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            String fileName = "用户数据";
-            // 编码处理：适配不同浏览器，替换+为%20避免空格问题
-            String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.name()).replace("+", "%20");
-            response.setHeader("Content-Disposition",
-                    "attachment; filename=\"" + encodedFileName + ".xlsx\"; filename*=UTF-8''" + encodedFileName + ".xlsx");
-
-            // 2. 查询数据库：获取所有用户数据（MyBatis-Plus的selectList(null)表示无条件查询）
-            List<user> userList = userMapper.selectAllUser();
-            // 验证数据：如果无数据，抛出异常，避免生成0KB损坏文件
-            if (CollectionUtils.isEmpty(userList)) {
-                throw new RuntimeException("暂无用户数据可导出");
-            }
-
-            // 3. 转换数据：将数据库实体转换为Excel DTO（解耦，避免暴露数据库字段）
-            List<UserExcelDTO> excelDTOList = userList.stream().map(user -> {
-                UserExcelDTO dto = new UserExcelDTO();
-                dto.setId(user.getId());
-                dto.setName(user.getName());
-                dto.setUserTypeEnum(user.getUserTypeEnum());
-                dto.setUserName(user.getUserName());
-                dto.setPassWord(user.getPassword());
-                dto.setSexEnum(user.getSexEnum());
-                dto.setMobile(user.getMobile());
-                dto.setMail(user.getMail());
-                dto.setClassId(user.getClassId());
-                return dto;
-            }).collect(Collectors.toList());
-
-            // 4. 写入Excel并输出到浏览器：使用try-with-resources自动关闭流，避免资源泄露
-            try (ServletOutputStream outputStream = response.getOutputStream()) {
-                EasyExcel.write(outputStream, UserExcelDTO.class)
-                        .sheet("用户列表") // Excel工作表名称
-                        .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 自动适配列宽（优化体验）
-                        .doWrite(excelDTOList); // 写入数据
-                outputStream.flush(); // 强制刷写流，确保数据全部输出
-            }
-        }
+//        /**
+//         * 导出所有用户数据到Excel
+//         * @param response HTTP响应对象，用于输出Excel流
+//         * @throws Exception 异常抛出（实际项目可自定义全局异常处理）
+//         */
+//        @GetMapping("/exportData")
+//        @Operation(summary = "导出数据")
+//        @ApiOperationSupport(author = "陈嘉豪")
+//        public void exportUserExcel(HttpServletResponse response) throws Exception {
+//            // 1. 配置响应头：告诉浏览器这是Excel文件，需要下载，解决中文文件名乱码
+//            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+//            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+//            String fileName = "用户数据";
+//            // 编码处理：适配不同浏览器，替换+为%20避免空格问题
+//            String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.name()).replace("+", "%20");
+//            response.setHeader("Content-Disposition",
+//                    "attachment; filename=\"" + encodedFileName + ".xlsx\"; filename*=UTF-8''" + encodedFileName + ".xlsx");
+//
+//            // 2. 查询数据库：获取所有用户数据（MyBatis-Plus的selectList(null)表示无条件查询）
+//            List<user> userList = userMapper.selectAllUser();
+//            // 验证数据：如果无数据，抛出异常，避免生成0KB损坏文件
+//            if (CollectionUtils.isEmpty(userList)) {
+//                throw new RuntimeException("暂无用户数据可导出");
+//            }
+//
+//            // 3. 转换数据：将数据库实体转换为Excel DTO（解耦，避免暴露数据库字段）
+//            List<UserExcelDTO> excelDTOList = userList.stream().map(user -> {
+//                UserExcelDTO dto = new UserExcelDTO();
+//                dto.setId(user.getId());
+//                dto.setName(user.getName());
+//                dto.setUserTypeEnum(user.getUserTypeEnum());
+//                dto.setUserName(user.getUserName());
+//                dto.setPassWord(user.getPassword());
+//                dto.setSexEnum(user.getSexEnum());
+//                dto.setMobile(user.getMobile());
+//                dto.setMail(user.getMail());
+//                dto.setClassId(user.getClassId());
+//                return dto;
+//            }).collect(Collectors.toList());
+//
+//            // 4. 写入Excel并输出到浏览器：使用try-with-resources自动关闭流，避免资源泄露
+//            try (ServletOutputStream outputStream = response.getOutputStream()) {
+//                EasyExcel.write(outputStream, UserExcelDTO.class)
+//                        .sheet("用户列表") // Excel工作表名称
+//                        .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 自动适配列宽（优化体验）
+//                        .doWrite(excelDTOList); // 写入数据
+//                outputStream.flush(); // 强制刷写流，确保数据全部输出
+//            }
+//        }
 
     }
 

@@ -2,6 +2,7 @@ package org.example.Demo.server.Impl;
 
 import com.common.Context.BaseContext;
 import com.common.Result.PageResult;
+import com.common.Result.Result;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.RequiredArgsConstructor;
@@ -80,5 +81,21 @@ public class SemesterImpl implements SemesterServer {
         Semester semester = new Semester();
         BeanUtils.copyProperties(updateSemesterDTO,semester);
         semesterMapper.updateSemester(semester);
+    }
+
+    /**
+     * 删除学期
+     * @param id
+     * @return
+     */
+    @Override
+    public Result deleteSemester(Long id) {
+        Result result = new Result<>();
+        if (semesterMapper.selectSemeterById(id)) {
+            semesterMapper.deleteSemesterById(id);
+            result.setMsg("删除成功");
+            return result;
+        }
+        return result;
     }
 }

@@ -46,4 +46,9 @@ public interface ClassMapper {
     @Delete("delete from classes where id=#{id}")
     void deleteClassesId(Long aLong);
 
+    /**
+     * 修改班级
+     * @param clazz
+     */
+    void updateClass(Class clazz);
 }

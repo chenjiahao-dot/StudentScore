@@ -21,4 +21,18 @@
             <if test="courseId!=null">course_id=#{courseId}</if>
         </where>
     </select>
+    <select id="selectScoreForExcel" resultType="org.example.Demo.DTO.Score.ScoreExcelDTO">
+        SELECT
+        s.id,
+        u.name            AS studentName,  <!-- 学生姓名 -->
+        c.course_name     AS courseName,   <!-- 课程名称 -->
+        s.score,
+        s.exam_type       AS examType,
+        se.semester_name  AS semesterName, <!-- 学期名称 -->
+        s.create_time
+        FROM score s
+        LEFT JOIN user u      ON s.student_id = u.id
+        LEFT JOIN course c    ON s.course_id = c.id
+        LEFT JOIN semester se ON s.semester_id = se.id
+    </select>
 </mapper>

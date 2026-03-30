@@ -4,11 +4,15 @@ import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
+import org.example.Demo.DTO.Score.ScoreExcelDTO;
 import org.example.Demo.DTO.Score.ScorePageQueryDTO;
 import org.example.Demo.VO.Score.scoreVO;
 import org.example.Demo.entity.score;
+import org.example.Demo.entity.user;
 import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.enummerate.ExamTypeEnum;
+
+import java.util.List;
 
 public interface ScoreMapper {
     @Select("select exam_type from score where id=#{id}")
@@ -30,4 +34,12 @@ public interface ScoreMapper {
     boolean selectById(Long id);
     @Delete("delete from score where id=#{id}")
     void deleteById(Long id);
+    @Select("select id from semester where id=#{id}")
+    Long selectSemesterById(Long semesterId);
+    @Select("select * from score")
+    List<score> selectAllScore();
+    @Select("select name from user where id=#{studentId} ")
+    String selectStudentName(String studentId);
+
+    List<ScoreExcelDTO> selectScoreForExcel();
 }

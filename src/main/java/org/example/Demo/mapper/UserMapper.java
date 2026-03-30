@@ -97,6 +97,12 @@ public interface UserMapper {
      */
     @Select("select user_type_enum from user where id=#{id}")
     Users selectById(Long userId);
+
+    /**
+     * 判断用户是否存在
+     * @param classId
+     * @return
+     */
     @Select("select id from classes where id=#{id}")
     newUser getClassById(Long classId);
 }

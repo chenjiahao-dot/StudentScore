@@ -6,4 +6,14 @@
 <!-- namespace必须与Mapper接口全类名一致 -->
 <mapper namespace="org.example.Demo.mapper.ClassMapper">
 
+    <update id="updateClass">
+        update classes
+        <set>
+            <if test="className!=null">class_name=#{className},</if>
+            <if test="grade!=null">grade=#{grade}</if>
+        </set>
+        <where>
+            id=#{id}
+        </where>
+    </update>
 </mapper>

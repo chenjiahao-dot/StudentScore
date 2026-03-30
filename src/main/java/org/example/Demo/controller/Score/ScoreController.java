@@ -1,23 +1,42 @@
 package org.example.Demo.controller.Score;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.common.Result.PageResult;
 import com.common.Result.Result;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.Demo.Common.BaseException;
 import org.example.Demo.DTO.Class.AddClassDTO;
 import org.example.Demo.DTO.Score.AddScoreDTO;
+import org.example.Demo.DTO.Score.ScoreExcelDTO;
 import org.example.Demo.DTO.Score.ScorePageQueryDTO;
 import org.example.Demo.DTO.Score.UpdateStudentScoreDTO;
+import org.example.Demo.DTO.User.UserExcelDTO;
 import org.example.Demo.VO.Score.scoreVO;
+import org.example.Demo.entity.score;
+import org.example.Demo.entity.user;
+import org.example.Demo.mapper.ScoreMapper;
 import org.example.Demo.server.ClassServer;
 import org.example.Demo.server.ScoreServer;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/score")
@@ -27,6 +46,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ScoreController {
     private final ScoreServer scoreServer;
+    private final ScoreMapper scoreMapper;
     /**
      * 录入成绩
      *
@@ -94,5 +114,27 @@ public class ScoreController {
         } catch (Exception e) {
             return Result.error("删除失败，可能是id不存在");
         }
+    }
+    /**
+     * 导出所有成绩数据到Excel
+     * @param response HTTP响应对象，用于输出Excel流
+     * @throws Exception 异常抛出（实际项目可自定义全局异常处理）
+     */
+    @GetMapping("/exportScore")
+    @Operation(summary = "导出成绩")
+    @ApiOperationSupport(author = "陈嘉豪")
+    public void exportExcel(HttpServletResponse response) throws IOException {
+        // 1. 直接查询 带姓名、课程名、学期名 的完整数据
+        List<ScoreExcelDTO> list = scoreMapper.selectScoreForExcel();
+
+        // 2. 导出 Excel
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("学生成绩表", "UTF-8");
+        response.setHeader("Content-disposition", "attachment;filename=" + fileName + ".xlsx");
+
+        EasyExcel.write(response.getOutputStream(), ScoreExcelDTO.class)
+                .sheet("成绩数据")
+                .doWrite(list);
     }
 }

@@ -5,6 +5,7 @@ import com.common.Result.Result;
 import org.example.Demo.DTO.Class.AddClassDTO;
 import org.example.Demo.DTO.Class.DeleteClassesDTO;
 import org.example.Demo.DTO.Class.ListClassDTO;
+import org.example.Demo.DTO.Class.UpdateClassDTO;
 import org.example.Demo.VO.Class.classListAllVO;
 
 public interface ClassServer {
@@ -15,4 +16,5 @@ public interface ClassServer {
     Result deleteClasses(DeleteClassesDTO deleteClassesDTO);
 
 
+    void updateClass(UpdateClassDTO updateClassDTO);
 }

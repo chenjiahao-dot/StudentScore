@@ -1,6 +1,7 @@
 package org.example.Demo.server;
 
 import com.common.Result.PageResult;
+import com.common.Result.Result;
 import org.example.Demo.DTO.SemesterController.AddSemesterDTO;
 import org.example.Demo.DTO.SemesterController.ListSemesterDTO;
 import org.example.Demo.DTO.SemesterController.UpdateSemesterDTO;
@@ -12,4 +13,6 @@ public interface SemesterServer {
     PageResult<semesterListAllVO> listSemester(ListSemesterDTO listSemesterDTO);
 
     void updateSemester(UpdateSemesterDTO updateSemesterDTO);
+
+    Result deleteSemester(Long id);
 }

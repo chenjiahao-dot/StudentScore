@@ -4,6 +4,7 @@ import com.common.Result.PageResult;
 import com.common.Result.Result;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,5 +68,23 @@ public class SemesterController {
     public Result updateSemester(@RequestBody UpdateSemesterDTO updateSemesterDTO) {
         semesterServer.updateSemester(updateSemesterDTO);
         return Result.success("修改成功", updateSemesterDTO);
+    }
+    /**
+     * 删除学期
+     *
+     * @Param id
+     * @Return
+     */
+    @PostMapping("/deleteSemester/{id}")
+    @Operation(summary = "删除学期")
+    @ApiOperationSupport(author = "陈嘉豪")
+    public Result deleteSemester(@PathVariable @Parameter(description = "要删除的学期的id") Long id) {
+        Result result = new Result<>();
+        try {
+            semesterServer.deleteSemester(id);
+            return Result.success("删除成功");
+        } catch (Exception e) {
+            return Result.error("删除失败，可能是id不存在");
+        }
     }
 }

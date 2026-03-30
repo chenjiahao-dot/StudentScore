@@ -1,5 +1,6 @@
 package org.example.Demo.server.Impl;
 
+import com.common.Context.BaseContext;
 import com.common.Result.PageResult;
 import com.common.Result.Result;
 import com.github.pagehelper.Page;
@@ -7,10 +8,14 @@ import com.github.pagehelper.PageHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.Demo.Common.ClassException;
+import org.example.Demo.Common.ScoreException;
 import org.example.Demo.DTO.Class.AddClassDTO;
 import org.example.Demo.DTO.Class.DeleteClassesDTO;
 import org.example.Demo.DTO.Class.ListClassDTO;
+import org.example.Demo.DTO.Class.UpdateClassDTO;
 import org.example.Demo.VO.Class.classListAllVO;
+import org.example.Demo.entity.score;
+import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.server.ClassServer;
 import org.example.Demo.entity.Class;
 import org.example.Demo.mapper.ClassMapper;
@@ -83,6 +88,21 @@ public class ClassImpl implements ClassServer {
         return result;
     }
 
+    /**
+     * 修改班级
+     * @param updateClassDTO
+     */
+    @Override
+    public void updateClass(UpdateClassDTO updateClassDTO) {
+        UserTypeEnum userTypeEnum= BaseContext.getCurrentPrimaryUserEnum();
+
+        if (userTypeEnum!=UserTypeEnum.ADMIN && userTypeEnum!=UserTypeEnum.TEACHER) {
+            throw new ScoreException("无权限修改班级");
+        }
+        Class clazz=new Class();
+        BeanUtils.copyProperties(updateClassDTO,clazz);
+        classMapper.updateClass(clazz);
+    }
 
 
 }

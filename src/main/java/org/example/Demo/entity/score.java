@@ -17,7 +17,9 @@ public class score {
     @Schema(description = "成绩")
     private String score;
     @Schema(description = "考试类型")
-    private ExamTypeEnum examType;
+    private String examType;
+    @Schema(description = "学期ID")
+    private Long semesterId;
     @Schema(description = "录入时间")
     private Date createTime;
 }

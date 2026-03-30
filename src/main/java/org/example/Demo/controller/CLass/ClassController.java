@@ -11,6 +11,8 @@ import org.example.Demo.DTO.Class.AddClassDTO;
 import com.common.Result.Result;
 import org.example.Demo.DTO.Class.DeleteClassesDTO;
 import org.example.Demo.DTO.Class.ListClassDTO;
+import org.example.Demo.DTO.Class.UpdateClassDTO;
+import org.example.Demo.DTO.Course.UpdateCourseDTO;
 import org.example.Demo.VO.Class.classListAllVO;
 import org.example.Demo.server.ClassServer;
 import org.springframework.util.StringUtils;
@@ -75,5 +77,17 @@ public class ClassController {
             return Result.error("删除失败，可能是班级不存在");
         }
     }
-
+    /**
+     * 对班级进行修改
+     *
+     * @param updateClassDTO
+     * @return
+     */
+    @PostMapping("/updateClass")
+    @Operation(summary = "对班级进行修改")
+    @ApiOperationSupport(author = "陈嘉豪")
+    public Result updateClass(@RequestBody UpdateClassDTO updateClassDTO) {
+        classServer.updateClass(updateClassDTO);
+        return Result.success("修改成功", updateClassDTO);
+    }
 }
