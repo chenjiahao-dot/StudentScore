@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.Demo.entity.userData;
+import org.example.Demo.entity.UserData;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +23,7 @@ import java.util.Map;
 public class UserLoginData {
     @JsonSerialize(using = com.fasterxml.jackson.databind.ser.std.ToStringSerializer.class)
     private Long userId;
-    private userData userData;
+    private UserData userData;
     private List<String> operationList;
     private Map<String, List<MenuVO>> menuMap;
     private String name;

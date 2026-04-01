@@ -3,6 +3,7 @@ package org.example.Demo.GlobalExceptionHandler;
 import com.common.Result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.example.Demo.Common.BaseException;
+import org.example.Demo.Common.ScoreException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -24,4 +25,6 @@ public class GlobalExceptionHandler {
     public Result handlerAll(Exception e) {
         return Result.success("系统异常：" + e.getMessage());
     }
+
+
 }

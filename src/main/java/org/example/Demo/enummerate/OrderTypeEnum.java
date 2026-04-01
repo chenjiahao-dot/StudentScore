@@ -1,4 +1,4 @@
-package org.example.Demo.OrderTypeEnum;
+package org.example.Demo.enummerate;
 
 import lombok.Getter;
 

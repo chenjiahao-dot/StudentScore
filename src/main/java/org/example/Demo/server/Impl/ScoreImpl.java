@@ -5,18 +5,22 @@ import com.common.Result.PageResult;
 import com.common.Result.Result;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
+import com.github.xiaoymin.knife4j.core.util.StrUtil;
+import com.google.common.base.CaseFormat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.Demo.Common.BaseException;
 import org.example.Demo.Common.ScoreException;
 import org.example.Demo.DTO.Score.AddScoreDTO;
+import org.example.Demo.DTO.Score.MyScorePateQueryDTO;
 import org.example.Demo.DTO.Score.ScorePageQueryDTO;
 import org.example.Demo.DTO.Score.UpdateStudentScoreDTO;
 import org.example.Demo.UserException.AddUserException;
-import org.example.Demo.VO.Score.scoreVO;
-import org.example.Demo.entity.score;
+import org.example.Demo.VO.Score.MyScoreVO;
+import org.example.Demo.VO.Score.ScoreVO;
+import org.example.Demo.entity.Course;
+import org.example.Demo.entity.Score;
+import org.example.Demo.enummerate.OrderTypeEnum;
 import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.enummerate.ExamTypeEnum;
 import org.example.Demo.mapper.ScoreMapper;
@@ -24,8 +28,6 @@ import org.example.Demo.server.ScoreServer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Date;
 import java.util.List;
@@ -42,11 +44,19 @@ public class ScoreImpl implements ScoreServer {
      */
     @Override
     public void addScore(AddScoreDTO addScoreDTO) {
+        //获取当前用户ID
+        Long userId = BaseContext.getCurrentId();
+        //获取当前用户身份
         UserTypeEnum userTypeEnum= BaseContext.getCurrentPrimaryUserEnum();
+        //判断学生是否存在
         UserTypeEnum userTypeEnumId=scoreMapper.selectUserType(addScoreDTO.getStudentId());
+        //studentId（String 类型）转成 Long
         Long studentId = Long.valueOf(addScoreDTO.getStudentId());
+        //courseId（String 类型）转成 Long
         Long courseId = Long.valueOf(addScoreDTO.getCourseId());
+        //判断学期是否存在
         Long semesterId=scoreMapper.selectSemesterById(addScoreDTO.getSemesterId());
+
         ExamTypeEnum examType = addScoreDTO.getExamType();
 
         // 判断这个学生 + 这门课 + 这个考试类型（期中/期末）是否已经存在
@@ -63,15 +73,18 @@ public class ScoreImpl implements ScoreServer {
         if (userTypeEnumId != UserTypeEnum.STUDENT) {
             throw new AddUserException("该用户不是学生");
         }
-
-        if (userTypeEnum==UserTypeEnum.ADMIN||userTypeEnum==UserTypeEnum.TEACHER) {
-          score score =new score();
-          score.setCreateTime(new Date());
-          BeanUtils.copyProperties(addScoreDTO,score);
-          scoreMapper.insertScore(score);
-        }else{
-            throw new ScoreException("无权限");
+        if (userTypeEnum==UserTypeEnum.TEACHER){
+            Long classId=scoreMapper.selectClassIdByStudentId(studentId);
+            int countId=scoreMapper.selectTeacherCourseClass(userId,courseId,classId);
+            if (countId == 0) {
+                throw new ScoreException("你无权录入该班级/课程");
+            }
         }
+        Score score = new Score();
+        score.setCreateTime(new Date());
+        BeanUtils.copyProperties(addScoreDTO, score);
+        scoreMapper.insertScore(score);
+
     }
 
     /**
@@ -81,12 +94,23 @@ public class ScoreImpl implements ScoreServer {
      */
     @Override
     @Transactional
-    public PageResult<scoreVO> pageScore(ScorePageQueryDTO scorePageQueryDTO) {
+    public PageResult<ScoreVO> pageScore(ScorePageQueryDTO scorePageQueryDTO) {
         PageHelper.startPage(scorePageQueryDTO.getPage(), scorePageQueryDTO.getPageSize());
-        Page<scoreVO> page = scoreMapper.pageScore(scorePageQueryDTO);
-        long total = page.getTotal();
-        List<scoreVO> roles = page.getResult();
-        return new PageResult<>(total, roles);
+        String sortField = "id";
+        String sortOrder = "asc";
+        // 如果前端传了字段 → 替换
+        if (StrUtil.isNotBlank(scorePageQueryDTO.getSortField())) {
+            sortField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, scorePageQueryDTO.getSortField());
+        }
+        // 如果前端传了 ASC → 改成正序
+        if (scorePageQueryDTO.getOrderType() == OrderTypeEnum.DESC) {
+            sortOrder = "desc";
+        }
+        PageHelper.orderBy(sortField + " " + sortOrder);
+        List<ScoreVO> list = scoreMapper.pageScore(scorePageQueryDTO);
+        Page<ScoreVO> page = (Page<ScoreVO>) list;
+
+        return new PageResult<>(page.getTotal(), page.getResult());
     }
 
     /**
@@ -96,16 +120,27 @@ public class ScoreImpl implements ScoreServer {
     @Override
     public void updatestudentScore(UpdateStudentScoreDTO updateStudentScoreDTO) {
         UserTypeEnum userTypeEnum= BaseContext.getCurrentPrimaryUserEnum();
+        Long userId=BaseContext.getCurrentId();
 
-        if (userTypeEnum!=UserTypeEnum.ADMIN && userTypeEnum!=UserTypeEnum.TEACHER) {
-            throw new ScoreException("无权限修改成绩");
-        }
         //判断修改的分数是否为负数或大于100
         int scoreValue = Integer.parseInt(updateStudentScoreDTO.getScore());
         if (scoreValue < 0 || scoreValue>100) {
             throw new ScoreException("成绩必须在0~100之间");
         }
-        score score = new score();
+        Score oldScore = scoreMapper.selectStudentById(updateStudentScoreDTO.getId());
+        if (oldScore == null) {
+            throw new RuntimeException("成绩不存在");
+        }
+        if (userTypeEnum == UserTypeEnum.TEACHER) {
+            Long classId = scoreMapper.selectClassIdByStudentId(oldScore.getStudentId());
+            int count = scoreMapper.checkTeacherCourseClass(userId, oldScore.getCourseId(), classId);
+            if (count == 0) {
+                throw new RuntimeException("你无权修改该班级/课程");
+            }
+        }else if (userTypeEnum!=UserTypeEnum.ADMIN ) {
+            throw new ScoreException("无权限修改成绩");
+        }
+        Score score = new Score();
         BeanUtils.copyProperties(updateStudentScoreDTO,score);
         scoreMapper.updateStudentScore(score);
     }
@@ -124,6 +159,55 @@ public class ScoreImpl implements ScoreServer {
             return result;
         }
         return result;
+    }
+
+    /**
+     * 根据学生ID查询成绩详情
+     * @param id
+     * @return
+     */
+    @Override
+    public ScoreVO getStudentScoreById(Long id) {
+        ScoreVO scoreVO = scoreMapper.selectScore(id);
+        if (scoreMapper.countWarehouseGoods(id) == 0) {
+            throw new BaseException("学生成绩详情不存在");
+        }
+        return scoreVO;
+    }
+
+    /**
+     * 分页查询我的成绩
+     * @param myScorePateQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult<MyScoreVO> pageMyScore(MyScorePateQueryDTO myScorePateQueryDTO) {
+        Long  userId = BaseContext.getCurrentId();
+        UserTypeEnum userTypeEnum= BaseContext.getCurrentPrimaryUserEnum();
+        Long scoreId=scoreMapper.selectMyScoreById(userId);
+        if (userTypeEnum!=UserTypeEnum.STUDENT){
+            throw new ScoreException("只有学生可以查询到自己的成绩");
+        }
+        if (scoreId==null){
+            throw new ScoreException("该学生暂无成绩");
+        }
+        PageHelper.startPage(myScorePateQueryDTO.getPage(), myScorePateQueryDTO.getPageSize());
+        String sortField = "id";
+        String sortOrder = "asc";
+        // 如果前端传了字段 → 替换
+        if (StrUtil.isNotBlank(myScorePateQueryDTO.getSortField())) {
+            sortField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, myScorePateQueryDTO.getSortField());
+        }
+        // 如果前端传了 ASC → 改成正序
+        if (myScorePateQueryDTO.getOrderType() == OrderTypeEnum.DESC) {
+            sortOrder = "desc";
+        }
+        PageHelper.orderBy(sortField + " " + sortOrder);
+
+        List<MyScoreVO> list = scoreMapper.pageMyScore(userId);
+        Page<MyScoreVO> page = (Page<MyScoreVO>) list;
+
+        return new PageResult<>(page.getTotal(), page.getResult());
     }
 
 }

@@ -1,13 +1,15 @@
-package org.example.Demo.DTO.Score;
+package org.example.Demo.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.example.Demo.enummerate.ExamTypeEnum;
 
+import java.util.Date;
+
 @Data
-public class UpdateStudentScoreDTO {
+public class Score {
     @Schema(description = "成绩ID")
-    private Long id ;
+    private Long id;
     @Schema(description = "学生ID")
     private Long studentId ;
     @Schema(description = "课程ID")
@@ -16,4 +18,8 @@ public class UpdateStudentScoreDTO {
     private String score;
     @Schema(description = "考试类型")
     private ExamTypeEnum examType;
+    @Schema(description = "学期ID")
+    private Long semesterId;
+    @Schema(description = "录入时间")
+    private Date createTime;
 }

@@ -5,16 +5,18 @@ import com.common.Result.PageResult;
 import com.common.Result.Result;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.github.xiaoymin.knife4j.core.util.StrUtil;
+import com.google.common.base.CaseFormat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.Demo.Common.SemesterException;
 import org.example.Demo.DTO.SemesterController.AddSemesterDTO;
 import org.example.Demo.DTO.SemesterController.ListSemesterDTO;
 import org.example.Demo.DTO.SemesterController.UpdateSemesterDTO;
-import org.example.Demo.VO.Score.scoreVO;
+import org.example.Demo.VO.Score.ScoreVO;
 import org.example.Demo.VO.Semester.semesterListAllVO;
 import org.example.Demo.entity.Semester;
-import org.example.Demo.entity.score;
+import org.example.Demo.enummerate.OrderTypeEnum;
 import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.mapper.SemesterMapper;
 import org.example.Demo.server.SemesterServer;
@@ -57,10 +59,21 @@ public class SemesterImpl implements SemesterServer {
     @Override
     public PageResult<semesterListAllVO> listSemester(ListSemesterDTO listSemesterDTO) {
         PageHelper.startPage(listSemesterDTO.getPage(), listSemesterDTO.getPageSize());
-        Page<semesterListAllVO> page = semesterMapper.pageSemester(listSemesterDTO);
-        long total = page.getTotal();
-        List<semesterListAllVO> roles = page.getResult();
-        return new PageResult<>(total, roles);
+        String sortField = "id";
+        String sortOrder = "desc";
+        // 如果前端传了字段 → 替换
+        if (StrUtil.isNotBlank(listSemesterDTO.getSortField())) {
+            sortField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, listSemesterDTO.getSortField());
+        }
+        // 如果前端传了 ASC → 改成正序
+        if (listSemesterDTO.getOrderType() == OrderTypeEnum.ASC) {
+            sortOrder = "asc";
+        }
+        PageHelper.orderBy(sortField + " " + sortOrder);
+        List<semesterListAllVO> list = semesterMapper.pageSemester(listSemesterDTO);
+        Page<semesterListAllVO> page = (Page<semesterListAllVO>) list;
+
+        return new PageResult<>(page.getTotal(), page.getResult());
     }
 
     /**

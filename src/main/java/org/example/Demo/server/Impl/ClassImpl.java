@@ -5,6 +5,8 @@ import com.common.Result.PageResult;
 import com.common.Result.Result;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.github.xiaoymin.knife4j.core.util.StrUtil;
+import com.google.common.base.CaseFormat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.Demo.Common.ClassException;
@@ -14,7 +16,7 @@ import org.example.Demo.DTO.Class.DeleteClassesDTO;
 import org.example.Demo.DTO.Class.ListClassDTO;
 import org.example.Demo.DTO.Class.UpdateClassDTO;
 import org.example.Demo.VO.Class.classListAllVO;
-import org.example.Demo.entity.score;
+import org.example.Demo.enummerate.OrderTypeEnum;
 import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.server.ClassServer;
 import org.example.Demo.entity.Class;
@@ -60,10 +62,21 @@ public class ClassImpl implements ClassServer {
     @Override
     public PageResult<classListAllVO> listClass(ListClassDTO listClassDTO) {
         PageHelper.startPage(listClassDTO.getPage(), listClassDTO.getPageSize());
-        Page<classListAllVO> page = classMapper.pageQueryclass(listClassDTO);
-        long total = page.getTotal();
-        List<classListAllVO> roles = page.getResult();
-        return new PageResult<>(total, roles);
+        String sortField = "id";
+        String sortOrder = "desc";
+        // 如果前端传了字段 → 替换
+        if (StrUtil.isNotBlank(listClassDTO.getSortField())) {
+            sortField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, listClassDTO.getSortField());
+        }
+        // 如果前端传了 ASC → 改成正序
+        if (listClassDTO.getOrderType() == OrderTypeEnum.ASC) {
+            sortOrder = "asc";
+        }
+        PageHelper.orderBy(sortField + " " + sortOrder);
+        List<classListAllVO> list = classMapper.pageQueryclass(listClassDTO);
+        Page<classListAllVO> page = (Page<classListAllVO>) list;
+
+        return new PageResult<>(page.getTotal(), page.getResult());
     }
 
     /**

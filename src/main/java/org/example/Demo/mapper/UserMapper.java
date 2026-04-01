@@ -10,7 +10,7 @@ import org.example.Demo.DTO.User.UserPageQueryDTO;
 import org.example.Demo.VO.User.userMessageVO;
 import org.example.Demo.annotation.AutoFill;
 import org.example.Demo.entity.Users;
-import org.example.Demo.entity.user;
+import org.example.Demo.entity.User;
 import org.example.Demo.entity.newUser;
 import com.common.enumeration.OperationType;
 import org.example.Demo.enummerate.UserTypeEnum;
@@ -73,7 +73,7 @@ public interface UserMapper {
      * @return
      */
     @Select("select * from user")
-    List<user> selectAllUser();
+    List<User> selectAllUser();
 
     /**
      * 查询当前用户姓名
@@ -105,4 +105,14 @@ public interface UserMapper {
      */
     @Select("select id from classes where id=#{id}")
     newUser getClassById(Long classId);
+
+    /**
+     * 根据id查询用户
+     * @param id
+     * @return
+     */
+    @Select("select * from user where id=#{id} ")
+    User getById(Long id);
+
+
 }

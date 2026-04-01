@@ -18,7 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/course")
+@RequestMapping("/course/basics")
 @Slf4j
 @Tag(name = "课程相关接口")
 @CrossOrigin
@@ -36,7 +36,7 @@ public class courseController {
     @ApiOperationSupport(author = "陈嘉豪")
     public Result addCourse(@RequestBody AddCourseDTO addCourseDTO) {
         if (StringUtils.hasText(addCourseDTO.getCourseName())
-                && StringUtils.hasText(addCourseDTO.getTeacher())) {
+                && StringUtils.hasText(addCourseDTO.getTeacherName())) {
             courseServer.addCourse(addCourseDTO);
             return Result.success("新增成功", addCourseDTO);
         } else {

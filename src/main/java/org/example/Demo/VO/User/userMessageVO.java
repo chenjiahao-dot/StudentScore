@@ -7,7 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.Demo.enummerate.SexEnum;
-import org.example.Demo.OrderTypeEnum.UserTypeEnum;
+import org.example.Demo.enummerate.UserTypeEnum;
+
 
 import java.util.Date;
 

@@ -6,13 +6,13 @@ import org.example.Demo.enummerate.ExamTypeEnum;
 
 import java.util.Date;
 @Data
-public class scoreVO {
+public class MyScoreVO {
     @Schema(description = "成绩ID")
     private Long id;
     @Schema(description = "学生ID")
-    private String studentId ;
+    private Long studentId ;
     @Schema(description = "课程ID")
-    private String courseId;
+    private Long courseId;
     @Schema(description = "成绩")
     private String score;
     @Schema(description = "考试类型")

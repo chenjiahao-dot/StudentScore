@@ -8,9 +8,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.Demo.Common.BaseException;
 import org.example.Demo.Common.ClassException;
 import org.example.Demo.Common.PasswordEditFailedException;
+import org.example.Demo.Common.UserException;
 import org.example.Demo.DTO.User.LoginRequestUserDTO;
 import org.example.Demo.DTO.User.UserRePasswordDTO;
 import org.example.Demo.DTO.User.UserSignInDTO;
+import org.example.Demo.UserException.AccountNotFoundException;
+import org.example.Demo.entity.User;
+import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.server.UserServer;
 import org.example.Demo.UserException.AddUserException;
 import org.example.Demo.entity.newUser;
@@ -123,7 +127,22 @@ public class UserImpl implements UserServer {
         userMapper.update(newuser);
     }
 
-
-
-
+    /**
+     * 根据Id查询用户
+     * @param id
+     * @return
+     */
+    @Override
+    public User getByID(Long id) {
+        UserTypeEnum userTypeEnum = BaseContext.getCurrentPrimaryUserEnum();
+        if (userTypeEnum == UserTypeEnum.ADMIN) {
+            User user = userMapper.getById(id);
+            if (user == null) {
+                throw new AccountNotFoundException("用户不存在");
+            }
+            user.setPassword("******");
+            return user;
+        }
+       throw new UserException("无权限查询");
+    }
 }

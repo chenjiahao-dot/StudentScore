@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/class")
+@RequestMapping("/class/basics")
 @Slf4j
 @Tag(name = "班级相关接口")
 @CrossOrigin

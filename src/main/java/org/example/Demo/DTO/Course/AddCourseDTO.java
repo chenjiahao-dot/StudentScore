@@ -10,7 +10,7 @@ public class AddCourseDTO {
     @Schema(description = "课程名称")
     private String courseName;
     @Schema(description = "老师")
-    private String teacher;
+    private String teacherName;
     @Schema(description = "学分")
     private String credit;
 }

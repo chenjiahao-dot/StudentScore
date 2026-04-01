@@ -14,7 +14,7 @@
         AND course_id = #{courseId}
         AND exam_type = #{examType}
     </update>
-    <select id="pageScore" resultType="org.example.Demo.VO.Score.scoreVO">
+    <select id="pageScore" resultType="org.example.Demo.VO.Score.ScoreVO">
         select * from score
         <where>
             <if test="studentId!=null">student_id=#{studentId},</if>
@@ -24,15 +24,45 @@
     <select id="selectScoreForExcel" resultType="org.example.Demo.DTO.Score.ScoreExcelDTO">
         SELECT
         s.id,
-        u.name            AS studentName,  <!-- 学生姓名 -->
-        c.course_name     AS courseName,   <!-- 课程名称 -->
+        u.name            AS studentName,
+        c.course_name     AS courseName,
         s.score,
         s.exam_type       AS examType,
-        se.semester_name  AS semesterName, <!-- 学期名称 -->
+        se.semester_name  AS semesterName,
         s.create_time
         FROM score s
         LEFT JOIN user u      ON s.student_id = u.id
         LEFT JOIN course c    ON s.course_id = c.id
         LEFT JOIN semester se ON s.semester_id = se.id
+    </select>
+    <select id="selectTeacherCourseClass" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM teacher_course
+        <where>
+            teacher_id = #{userId}
+            AND course_id = #{courseId}
+            AND class_id = #{classId}
+        </where>
+    </select>
+    <select id="checkTeacherCourseClass" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM teacher_course
+        WHERE teacher_id = #{userId}
+        AND course_id = #{courseId}
+        AND class_id = #{classId}
+    </select>
+
+    <select id="pageMyScore" resultType="org.example.Demo.VO.Score.MyScoreVO">
+        SELECT
+        s.id,
+        s.student_id,
+        s.course_id,
+        s.score,
+        s.exam_type,
+        s.semester_id,
+        s.create_time,
+        c.course_name
+        FROM score s
+        LEFT JOIN course c ON s.course_id = c.id
+        WHERE s.student_id = #{studentId}  <!-- 只查自己 -->
     </select>
 </mapper>

@@ -1,9 +1,12 @@
 package org.example.Demo.server.Impl;
 
+import com.common.Context.BaseContext;
 import com.common.Result.PageResult;
 import com.common.Result.Result;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.github.xiaoymin.knife4j.core.util.StrUtil;
+import com.google.common.base.CaseFormat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.Demo.Common.ClassException;
@@ -13,7 +16,9 @@ import org.example.Demo.DTO.Course.DeleteCourseDTO;
 import org.example.Demo.DTO.Course.ListCourseDTO;
 import org.example.Demo.DTO.Course.UpdateCourseDTO;
 import org.example.Demo.VO.Course.courseListAllVO;
-import org.example.Demo.entity.course;
+import org.example.Demo.entity.Course;
+import org.example.Demo.enummerate.OrderTypeEnum;
+import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.mapper.CourseMapper;
 import org.example.Demo.server.CourseServer;
 import org.springframework.beans.BeanUtils;
@@ -35,11 +40,14 @@ public class CourseImpl implements CourseServer {
     @Override
     @Transactional
     public void addCourse(AddCourseDTO addCourseDTO) {
-        course course = courseMapper.selectCourseById(addCourseDTO.getCourseName());
+        Course course = courseMapper.selectCourseById(addCourseDTO.getCourseName());
+        Course teacher = courseMapper.selectTeacherById(addCourseDTO.getTeacherName());
         if (course != null) {
             throw new ClassException("课程已存在");
+        } else if (teacher==null) {
+            throw new ClassException("老师不存在，无法添加课程！");
         }
-        course = new course();
+        course = new Course();
         BeanUtils.copyProperties(addCourseDTO, course);
         courseMapper.insertCourse(course);
     }
@@ -51,11 +59,28 @@ public class CourseImpl implements CourseServer {
      */
     @Override
     public PageResult<courseListAllVO> listCourse(ListCourseDTO listCourseDTO) {
-        PageHelper.startPage(listCourseDTO.getPage(), listCourseDTO.getPageSize());
-        Page<courseListAllVO> page = courseMapper.pageQuerycourse(listCourseDTO);
-        long total = page.getTotal();
-        List<courseListAllVO> roles = page.getResult();
-        return new PageResult<>(total, roles);
+        UserTypeEnum userTypeEnum=BaseContext.getCurrentPrimaryUserEnum();
+        if (userTypeEnum==UserTypeEnum.ADMIN) {
+            PageHelper.startPage(listCourseDTO.getPage(), listCourseDTO.getPageSize());
+            String sortField = "id";
+            String sortOrder = "desc";
+            // 如果前端传了字段 → 替换
+            if (StrUtil.isNotBlank(listCourseDTO.getSortField())) {
+                sortField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, listCourseDTO.getSortField());
+            }
+            // 如果前端传了 ASC → 改成正序
+            if (listCourseDTO.getOrderType() == OrderTypeEnum.ASC) {
+                sortOrder = "asc";
+            }
+            PageHelper.orderBy(sortField + " " + sortOrder);
+            List<courseListAllVO> list = courseMapper.pageQueryCourse(listCourseDTO);
+            Page<courseListAllVO> page = (Page<courseListAllVO>) list;
+
+            return new PageResult<>(page.getTotal(), page.getResult());
+        }else{
+            throw new CourseException("无权限查询课程，请找管理员！");
+        }
+
     }
 
     /**
@@ -65,19 +90,25 @@ public class CourseImpl implements CourseServer {
      */
     @Override
     public Result deleteCourse(DeleteCourseDTO deleteCourseDTO) {
-        Result result = new Result();
-        List<Long> id = deleteCourseDTO.getId();
-        for (int i = 0; i < id.size(); i++) {
-            if (courseMapper.selectCourseId(id.get(i)) != 0) {
-                courseMapper.deleteCourseId(id.get(i));
-                result.setMsg("删除成功");
-                result.setCode(1);
-            } else {
-                result.setMsg("删除失败");
-                result.setCode(0);
+        UserTypeEnum userTypeEnum= BaseContext.getCurrentPrimaryUserEnum();
+        if (userTypeEnum.equals(UserTypeEnum.ADMIN)) {
+            Result result = new Result();
+            List<Long> id = deleteCourseDTO.getId();
+            for (int i = 0; i < id.size(); i++) {
+                if (courseMapper.selectCourseId(id.get(i)) != 0) {
+                    courseMapper.deleteCourseId(id.get(i));
+                    result.setMsg("删除成功");
+                    result.setCode(1);
+                } else {
+                    result.setMsg("删除失败");
+                    result.setCode(0);
+                }
             }
+            return result;
+        }else{
+            throw new CourseException("无权限删除课程，请找管理员！");
         }
-        return result;
+
     }
 
     /**
@@ -86,22 +117,28 @@ public class CourseImpl implements CourseServer {
      */
     @Override
     public void updateCourse(UpdateCourseDTO updateCourseDTO) {
-        String teacher=updateCourseDTO.getTeacher();
-        String credit=updateCourseDTO.getCredit();
-        //判断teacher和credit是否位空字段
-        if (teacher == null || teacher.isBlank()
-                || credit == null || credit.isBlank()) {
-            throw new CourseException("请填写完整信息");
+        UserTypeEnum userTypeEnum= BaseContext.getCurrentPrimaryUserEnum();
+        if (userTypeEnum.equals(UserTypeEnum.ADMIN)) {
+            String teacher=updateCourseDTO.getTeacher();
+            String credit=updateCourseDTO.getCredit();
+            //判断teacher和credit是否位空字段
+            if (teacher == null || teacher.isBlank()
+                    || credit == null || credit.isBlank()) {
+                throw new CourseException("请填写完整信息");
+            }
+
+            //credit必须是数字
+            try {
+                Integer.parseInt(credit);
+            } catch (NumberFormatException e) {
+                throw new CourseException("学分必须是数字");
+            }
+            Course course = new Course();
+            BeanUtils.copyProperties(updateCourseDTO, course);
+            courseMapper.updateCourse(course);
+        }else {
+            throw new CourseException("无权限修改课程信息，请找管理员！");
+        }
         }
 
-        //credit必须是数字
-        try {
-            Integer.parseInt(credit);
-        } catch (NumberFormatException e) {
-            throw new CourseException("学分必须是数字");
-        }
-        course course = new course();
-        BeanUtils.copyProperties(updateCourseDTO, course);
-        courseMapper.updateCourse(course);
-    }
 }

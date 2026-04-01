@@ -14,7 +14,7 @@
             </if>
         </where>
     </select>
-    <select id="selectList" resultType="org.example.Demo.entity.user">
+    <select id="selectList" resultType="org.example.Demo.entity.User">
         select * from user
     </select>
 

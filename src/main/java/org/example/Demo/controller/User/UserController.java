@@ -1,36 +1,24 @@
 package org.example.Demo.controller.User;
 
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.common.Context.BaseContext;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.example.Demo.DTO.User.LoginRequestUserDTO;
-import org.example.Demo.DTO.User.UserExcelDTO;
 import org.example.Demo.DTO.User.UserRePasswordDTO;
 import org.example.Demo.DTO.User.UserSignInDTO;
 import com.common.Result.Result;
 import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.server.UserServer;
-import org.example.Demo.entity.user;
 import org.example.Demo.mapper.UserMapper;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user")
@@ -124,28 +112,6 @@ public class UserController {
         return Result.success("用户已成功登录", userId);
     }
 
-    /**
-     * 查询当前用户姓名
-     *
-     * @param
-     * @return
-     */
-    @PostMapping("/UserName")
-    @Operation(summary = "查询用户姓名")
-    @ApiOperationSupport(author = "陈嘉豪")
-    public Result<String> getCurrentUserName(){
-        // 从ThreadLocal中获取当前用户ID
-        Long userId=BaseContext.getCurrentId();
-        String userName=userMapper.selectName(userId);
-
-        // 校验用户ID是否为空（防止异常情况）
-        if (userName == null) {
-            return Result.error("获取用户姓名失败");
-        }
-
-        // 返回用户ID
-        return Result.success("用户已成功登录", userName);
-    }
 
 
     /**

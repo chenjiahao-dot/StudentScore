@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Select;
 import org.example.Demo.DTO.Course.ListCourseDTO;
 import org.example.Demo.VO.Course.courseListAllVO;
 import org.example.Demo.annotation.AutoFill;
-import org.example.Demo.entity.course;
+import org.example.Demo.entity.Course;
 
 public interface CourseMapper {
     /**
@@ -17,14 +17,14 @@ public interface CourseMapper {
      * @return
      */
     @Select("select course_name from course where course_name=#{courseName} ")
-    course selectCourseById(String courseName);
+    Course selectCourseById(String courseName);
 
     /**
      * 添加课程
      * @param course
      */
-    @Insert("insert into course(course_name,teacher,credit)VALUES (#{courseName},#{teacher},#{credit} )")
-    void insertCourse(course course);
+    @Insert("insert into course(course_name,teacher_name,credit)VALUES (#{courseName},#{teacherName},#{credit} )")
+    void insertCourse(Course course);
 
     /**
      * 分页查询所有班级
@@ -32,7 +32,7 @@ public interface CourseMapper {
      * @return
      */
     @Select("select * from course")
-    Page<courseListAllVO> pageQuerycourse(ListCourseDTO listCourseDTO);
+    Page<courseListAllVO> pageQueryCourse(ListCourseDTO listCourseDTO);
 
     /**
      * 统计指定id的课程数量
@@ -54,5 +54,13 @@ public interface CourseMapper {
      * @param course
      */
     @AutoFill(OperationType.UPDATE)
-    void updateCourse(course course);
+    void updateCourse(Course course);
+
+    /**
+     * 查询老师是否存在才能添加课程
+     * @param teacher
+     * @return
+     */
+    @Select("select name from user where name=#{teacherName} ")
+    Course selectTeacherById(String teacher);
 }

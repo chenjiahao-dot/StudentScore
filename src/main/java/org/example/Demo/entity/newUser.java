@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.example.Demo.enummerate.SexEnum;
-import org.example.Demo.OrderTypeEnum.UserTypeEnum;
+import org.example.Demo.enummerate.UserTypeEnum;
+
 
 @Data
 @TableName("user")

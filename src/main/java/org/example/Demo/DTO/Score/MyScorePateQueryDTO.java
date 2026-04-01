@@ -2,15 +2,14 @@ package org.example.Demo.DTO.Score;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.example.Demo.enummerate.ExamTypeEnum;
 import org.example.Demo.enummerate.OrderTypeEnum;
-
-
 @Data
-public class ScorePageQueryDTO {
-    @Schema(description = "学生ID")
-    private String studentId ;
-    @Schema(description = "课程ID")
-    private String courseId;
+public class MyScorePateQueryDTO {
+    @Schema(description = "成绩")
+    private String score;
+    @Schema(description = "考试类型")
+    private ExamTypeEnum examType;
     @Schema(description = "页码", defaultValue = "1", required = true)
     private Integer page;
     @Schema(description = "每页显示记录数", defaultValue = "10", required = true)

@@ -6,8 +6,8 @@ import com.common.Exception.SortFieldException;
 import com.github.pagehelper.page.PageMethod;
 import org.example.Demo.Common.BaseException;
 
-import org.example.Demo.OrderTypeEnum.OrderTypeEnum;
 import org.example.Demo.UserException.UserDirectionException;
+import org.example.Demo.enummerate.OrderTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
@@ -93,40 +93,24 @@ public class PublicUtil {
     }
 
     public static void getPageHelper(Object table, String sortField, OrderTypeEnum orderType, String defaultSortField, OrderTypeEnum defaultOrderType) {
-        //判断排序字段是否为数据表中字段
+        // 1. 处理默认值
+        String finalSortField = "id"; // 你的默认排序字段
+        OrderTypeEnum finalOrderType = OrderTypeEnum.DESC;
+
         if (sortField != null) {
             if (!filedNameInObject(table, sortField)) {
                 throw new SortFieldException("不支持的排序字段");
             }
+            finalSortField = sortField;
         }
-        if (defaultSortField == null) {
-            defaultSortField = "id";
+        if (orderType != null) {
+            finalOrderType = orderType;
         }
-        if (defaultOrderType == null) {
-            defaultOrderType = OrderTypeEnum.DESC;
-        }
-        //设置表名
-        String tableName = (CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, table.getClass().getSimpleName())) + ".";
-        //设置默认排序为id
-        PageMethod.orderBy(tableName + defaultSortField + " " + defaultOrderType);
-        //判断是否自定义排序字段
-        if (sortField == null) {
-            sortField = defaultSortField;
-        }
-        //判断是否自定义排序方式
-        if (orderType == null) {
-            orderType = OrderTypeEnum.DESC;
-        }
-        //设置排序
-        PageMethod.orderBy(tableName + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, sortField)
-                + " " + orderType);
+
+        // 2. 驼峰转下划线（和数据库字段对应）
+        String dbSortField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, finalSortField);
+
+        // 3. 只调用一次 orderBy！去掉表名前缀！
+        PageMethod.orderBy(dbSortField + " " + finalOrderType);
     }
-
-
-
-
-
-
-
-
 }

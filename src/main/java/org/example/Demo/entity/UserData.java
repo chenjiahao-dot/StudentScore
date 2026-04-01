@@ -7,7 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.Demo.enummerate.SexEnum;
-import org.example.Demo.OrderTypeEnum.UserTypeEnum;
+import org.example.Demo.enummerate.UserTypeEnum;
+
 
 /**
  * @Author: Illya
@@ -17,7 +18,7 @@ import org.example.Demo.OrderTypeEnum.UserTypeEnum;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class userData {
+public class UserData {
     @JsonSerialize(using = com.fasterxml.jackson.databind.ser.std.ToStringSerializer.class)
     @Schema(description = "ID")
     private Long id;

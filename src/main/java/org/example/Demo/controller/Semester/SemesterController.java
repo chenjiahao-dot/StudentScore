@@ -20,7 +20,7 @@ import org.example.Demo.server.SemesterServer;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/semester")
+@RequestMapping("/semester/basics")
 @Slf4j
 @Tag(name = "学期相关接口")
 @CrossOrigin
