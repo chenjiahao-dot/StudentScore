@@ -11,6 +11,4 @@ public class AddCourseDTO {
     private String courseName;
     @Schema(description = "老师")
     private String teacherName;
-    @Schema(description = "学分")
-    private String credit;
 }

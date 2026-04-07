@@ -18,6 +18,8 @@ public class newUser {
     private String name;
     @Schema(description = "用户名(用户名可修改)")
     private String userName;
+    @Schema(description = "图片头像地址")
+    private String imageAddress;
     @Schema(description = "1-管理员，2-学生")
     private UserTypeEnum userTypeEnum;
     @Schema(description = "性别枚举对象WOMAN女,MAN男")

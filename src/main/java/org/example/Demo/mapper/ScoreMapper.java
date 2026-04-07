@@ -4,12 +4,15 @@ import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
-import org.example.Demo.DTO.Score.MyScorePateQueryDTO;
+import org.example.Demo.DTO.Score.PageQueryClassStudentScoreDTO;
 import org.example.Demo.DTO.Score.ScoreExcelDTO;
 import org.example.Demo.DTO.Score.ScorePageQueryDTO;
+import org.example.Demo.VO.Score.ClassAvgVO;
+import org.example.Demo.VO.Score.ClassStudentScoreVO;
 import org.example.Demo.VO.Score.MyScoreVO;
 import org.example.Demo.VO.Score.ScoreVO;
 import org.example.Demo.entity.Score;
+import org.example.Demo.entity.ScoreExcel;
 import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.enummerate.ExamTypeEnum;
 
@@ -71,4 +74,24 @@ public interface ScoreMapper {
      */
     @Select("select id from score where id=#{userId} ")
     Long selectMyScoreById(Long userId);
+
+
+    /**
+     * 分页查询班级学生成绩
+      * @param userId
+     * @return
+     */
+    List<ClassStudentScoreVO> pageCLassStudentScore(Long userId);
+
+    /**
+     * 批量插入成绩
+     * @param batchList
+     */
+    void batchInsertScore(List<ScoreExcel> batchList);
+
+    /**
+     * 查询班级平均分
+     * @return
+     */
+    List<ClassAvgVO> getClassAverageScore();
 }

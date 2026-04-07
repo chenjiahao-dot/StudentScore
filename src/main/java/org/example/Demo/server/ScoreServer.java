@@ -2,12 +2,13 @@ package org.example.Demo.server;
 
 import com.common.Result.PageResult;
 import com.common.Result.Result;
-import org.example.Demo.DTO.Score.AddScoreDTO;
-import org.example.Demo.DTO.Score.MyScorePateQueryDTO;
-import org.example.Demo.DTO.Score.ScorePageQueryDTO;
-import org.example.Demo.DTO.Score.UpdateStudentScoreDTO;
+import org.example.Demo.DTO.Score.*;
+import org.example.Demo.VO.Score.ClassAvgVO;
+import org.example.Demo.VO.Score.ClassStudentScoreVO;
 import org.example.Demo.VO.Score.MyScoreVO;
 import org.example.Demo.VO.Score.ScoreVO;
+
+import java.util.List;
 
 public interface ScoreServer {
     void addScore(AddScoreDTO addClassDTO);
@@ -20,5 +21,10 @@ public interface ScoreServer {
 
     ScoreVO getStudentScoreById(Long id);
 
-    PageResult<MyScoreVO> pageMyScore(MyScorePateQueryDTO myScorePateQueryDTO);
+    PageResult<MyScoreVO> pageMyScore(MyScorePageQueryDTO myScorePageQueryDTO);
+
+    PageResult<ClassStudentScoreVO> pageCLassStudentScore(PageQueryClassStudentScoreDTO pageQueryClassStudentScoreDTO);
+
+
+    List<ClassAvgVO> getClassAvg();
 }

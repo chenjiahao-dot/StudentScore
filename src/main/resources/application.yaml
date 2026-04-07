@@ -9,6 +9,36 @@ spring:
   jackson:
       date-format: yyyy-MM-dd HH:mm:ss.SSS # 包含毫秒
       time-zone: Asia/Shanghai # 时区
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  mail:
+      host: smtp.qq.com          # 邮箱SMTP服务器地址
+      port: 587                  # SMTP端口
+      username: 2790242417@qq.com
+      password: "xbethymhumuddhch"     # 不是邮箱密码，是SMTP授权码
+      protocol: smtp
+      default-encoding: UTF-8
+      properties:
+        mail:
+          smtp:
+            auth: true
+            starttls:
+              enable: true
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      timeout: 10000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
   configuration:
@@ -24,3 +54,6 @@ logging:
 jwt:
   secret: "abcdefghijklmnopqrstuvwxyz1234567890abcdefghi" # 32+ 英文字符（UTF-8 32+字节，满足 HS256 要求）
   expire: 86400000 # Token 过期时间：24小时（单位：毫秒）
+file:
+  upload-path: D:/upload/avatar/
+  access-path: /upload/avatar/

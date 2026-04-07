@@ -1,24 +1,40 @@
 package org.example.Demo.controller.User;
 
 import com.common.Context.BaseContext;
+import com.common.Util.JwtUtil;
+import com.common.Util.MailUtil;
+
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.Demo.Common.EmailNotFoundException;
+import org.example.Demo.Common.UserVerificationCodeException;
 import org.example.Demo.DTO.User.LoginRequestUserDTO;
 import org.example.Demo.DTO.User.UserRePasswordDTO;
 import org.example.Demo.DTO.User.UserSignInDTO;
 import com.common.Result.Result;
+import org.example.Demo.enummerate.SexEnum;
 import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.server.UserServer;
 import org.example.Demo.mapper.UserMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.MediaType;
+import jakarta.mail.MessagingException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
@@ -33,38 +49,60 @@ public class UserController {
      * Redis
      */
     private final RedisTemplate<String, String> redisTemplate;
-    /**
-     * 邮件工具
-     */
-    //private final MailUtil mailMsg;
+    @Value("${file.upload-path}")
+    private String uploadPath;
+
+    @Value("${file.access-path}")
+    private String accessPath;
+
+
+    private final JwtUtil jwtUtil;
+
+    private final StringRedisTemplate stringRedisTemplate;
 
     /**
-     * 短信工具
-     */
-    //private final SMSUtil smsUtil;
-    /**
      * 用户注册
-     * @param userSignInDTO
+     *
+     * @param
      * @return
      */
-    @PostMapping("/signIn")
+    @PostMapping(value = "/signIn", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "用户注册")
     @ApiOperationSupport(author = "陈嘉豪")
-    public Result signIn(@RequestBody UserSignInDTO userSignInDTO) {
-        log.info("开始注册用户{}", userSignInDTO.getMail());
-        userServer.signIn(userSignInDTO);
-        log.info("新增用户成功");
-        return Result.success("注册成功", null);
+    public Result<?> signIn(
+            @RequestParam("name") String name,
+            @RequestParam("userName") String userName,
+            @RequestParam("userTypeEnum") String userTypeEnum,
+            @RequestParam("sexEnum") String sexEnum,
+            @RequestParam("mail") String mail,
+            @RequestParam("mobile") String mobile,
+            @RequestParam("password") String password,
+            @RequestParam("classId") Long classId,
+            @RequestParam(value = "file", required = false) MultipartFile file
+    ) throws Exception {
+        UserSignInDTO dto = new UserSignInDTO();
+        dto.setName(name);
+        dto.setUserName(userName);
+        dto.setUserTypeEnum(UserTypeEnum.valueOf(userTypeEnum));
+        dto.setSexEnum(SexEnum.valueOf(sexEnum));
+        dto.setMail(mail);
+        dto.setMobile(mobile);
+        dto.setPassword(password);
+        dto.setClassId(classId);
+
+        userServer.signIn(dto, file);
+        return Result.success("注册成功");
     }
 
     /**
      * 用户登录
+     *
      * @param loginRequestUserDTO
      * @return
      */
     @PostMapping("/Login")
     @Operation(summary = "邮箱/手机登录")
-    @ApiOperationSupport(author = "陈嘉豪")// 接口文档描述
+    @ApiOperationSupport(author = "陈嘉豪")
     public Map<String, String> login(@Validated @RequestBody LoginRequestUserDTO loginRequestUserDTO) {
         // 调用服务层获取token
         String token = userServer.login(loginRequestUserDTO);
@@ -76,8 +114,27 @@ public class UserController {
 
     }
 
+    @PostMapping("/logout")
+    @Operation(summary = "退出登录")
+    @ApiOperationSupport(author = "陈嘉豪")
+    public void logout(String token) throws Exception {
+        Long userId = jwtUtil.parseToken(token);
+        if (userId == null) {
+            throw new RuntimeException("token无效");
+        }
+
+        // 2. 删除Redis中的登录数据
+        stringRedisTemplate.delete("login:token:" + userId);
+        stringRedisTemplate.delete("login:token:" + token);
+
+        // 3. 清除线程本地变量
+        BaseContext.removeCurrentId();
+    }
+
+
     /**
      * 修改密码
+     *
      * @param userRePasswordDTO
      * @return
      */
@@ -90,6 +147,7 @@ public class UserController {
         log.info("用户{}修改密码成功", BaseContext.getCurrentId());
         return Result.success("修改成功", null);
     }
+
     /**
      * 查询当前用户ID
      *
@@ -99,7 +157,7 @@ public class UserController {
     @PostMapping("/UserId")
     @Operation(summary = "查询用户ID")
     @ApiOperationSupport(author = "陈嘉豪")
-    public Result<Long> getCurrentUserId(){
+    public Result<Long> getCurrentUserId() {
         // 从ThreadLocal中获取当前用户ID
         Long userId = BaseContext.getCurrentId();
 
@@ -113,7 +171,6 @@ public class UserController {
     }
 
 
-
     /**
      * 判断当前用户是否为管理员
      *
@@ -125,7 +182,7 @@ public class UserController {
     @ApiOperationSupport(author = "陈嘉豪")
     public Result<Boolean> isCurrentUserAdmin() {
         // 从ThreadLocal中获取当前用户主角色
-       UserTypeEnum UserEnum = BaseContext.getCurrentPrimaryUserEnum();
+        UserTypeEnum UserEnum = BaseContext.getCurrentPrimaryUserEnum();
 
         // 校验角色是否为空（防止异常情况）
         if (UserEnum == null) {
@@ -140,76 +197,32 @@ public class UserController {
     }
 
 
-
-
     /**
-     * 发送邮箱验证码
-     * @param email
-     * @return
+     * 单独的图片上传接口
      */
-//        @Operation(summary = "发送邮箱验证码")
-//        @PostMapping(value = "/sendCode/email/{email}")
-//        @ApiOperationSupport(author = "陈嘉豪")
-//        public Result sendEmailCode(@PathVariable @Parameter(description = "邮箱") String email) throws MessagingException {
-//            log.info("邮箱号:{}",email);
-//            //从redis中去除验证码信息
-//            String code;
-//            try{
-//                code = redisTe
-//            }
-//        }
+    @PostMapping("/upload")
+    @Operation(summary = "单独文件上传")
+    @ApiOperationSupport(author = "陈嘉豪")
+    public String upload(@RequestParam("file") MultipartFile file) throws Exception {
+        // 1. 获取后缀
+        String originalFilename = file.getOriginalFilename();
+        String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
 
+        // 2. 生成唯一文件名
+        String fileName = UUID.randomUUID() + suffix;
 
+        // 3. 创建文件夹
+        File folder = new File(uploadPath);
+        if (!folder.exists()) folder.mkdirs();
 
-//        /**
-//         * 导出所有用户数据到Excel
-//         * @param response HTTP响应对象，用于输出Excel流
-//         * @throws Exception 异常抛出（实际项目可自定义全局异常处理）
-//         */
-//        @GetMapping("/exportData")
-//        @Operation(summary = "导出数据")
-//        @ApiOperationSupport(author = "陈嘉豪")
-//        public void exportUserExcel(HttpServletResponse response) throws Exception {
-//            // 1. 配置响应头：告诉浏览器这是Excel文件，需要下载，解决中文文件名乱码
-//            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-//            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-//            String fileName = "用户数据";
-//            // 编码处理：适配不同浏览器，替换+为%20避免空格问题
-//            String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.name()).replace("+", "%20");
-//            response.setHeader("Content-Disposition",
-//                    "attachment; filename=\"" + encodedFileName + ".xlsx\"; filename*=UTF-8''" + encodedFileName + ".xlsx");
-//
-//            // 2. 查询数据库：获取所有用户数据（MyBatis-Plus的selectList(null)表示无条件查询）
-//            List<user> userList = userMapper.selectAllUser();
-//            // 验证数据：如果无数据，抛出异常，避免生成0KB损坏文件
-//            if (CollectionUtils.isEmpty(userList)) {
-//                throw new RuntimeException("暂无用户数据可导出");
-//            }
-//
-//            // 3. 转换数据：将数据库实体转换为Excel DTO（解耦，避免暴露数据库字段）
-//            List<UserExcelDTO> excelDTOList = userList.stream().map(user -> {
-//                UserExcelDTO dto = new UserExcelDTO();
-//                dto.setId(user.getId());
-//                dto.setName(user.getName());
-//                dto.setUserTypeEnum(user.getUserTypeEnum());
-//                dto.setUserName(user.getUserName());
-//                dto.setPassWord(user.getPassword());
-//                dto.setSexEnum(user.getSexEnum());
-//                dto.setMobile(user.getMobile());
-//                dto.setMail(user.getMail());
-//                dto.setClassId(user.getClassId());
-//                return dto;
-//            }).collect(Collectors.toList());
-//
-//            // 4. 写入Excel并输出到浏览器：使用try-with-resources自动关闭流，避免资源泄露
-//            try (ServletOutputStream outputStream = response.getOutputStream()) {
-//                EasyExcel.write(outputStream, UserExcelDTO.class)
-//                        .sheet("用户列表") // Excel工作表名称
-//                        .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 自动适配列宽（优化体验）
-//                        .doWrite(excelDTOList); // 写入数据
-//                outputStream.flush(); // 强制刷写流，确保数据全部输出
-//            }
-//        }
+        // 4. 保存图片
+        file.transferTo(new File(uploadPath, fileName));
 
+        // 5. 返回文件名（存到数据库的就是这个）
+        return fileName;
     }
+
+}
+
+
 

@@ -32,8 +32,8 @@ public interface UserMapper {
      * @param newuser
      */
     @AutoFill(OperationType.INSERT)
-    @Insert("insert into user ( id,name, user_name,user_type_enum,mobile,mail,password,sex_enum,class_id) " +
-            "VALUES ( #{id}, #{name} ,#{userName},#{userTypeEnum}, #{mobile},#{mail},#{password}, #{sexEnum},#{classId} )")
+    @Insert("insert into user ( id,name, user_name,user_type_enum,mobile,mail,password,sex_enum,class_id,image_address) " +
+            "VALUES ( #{id}, #{name} ,#{userName},#{userTypeEnum}, #{mobile},#{mail},#{password}, #{sexEnum},#{classId},#{imageAddress}  )")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void insertUser(newUser newuser);
     @Select("SELECT * FROM user WHERE mail = #{mail}")

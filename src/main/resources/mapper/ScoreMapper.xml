@@ -5,6 +5,27 @@
 
 <!-- namespace必须与Mapper接口全类名一致 -->
 <mapper namespace="org.example.Demo.mapper.ScoreMapper">
+    <insert id="batchInsertScore">
+        INSERT INTO score (
+        student_id,
+        course_id,
+        score,
+        exam_type,
+        semester_id,
+        create_time
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.studentId},
+            #{item.courseId},
+            #{item.score},
+            #{item.examType},
+            #{item.semesterId},
+            #{item.createTime}
+            )
+        </foreach>
+    </insert>
     <update id="updateStudentScore">
         update score
         <set>
@@ -64,5 +85,58 @@
         FROM score s
         LEFT JOIN course c ON s.course_id = c.id
         WHERE s.student_id = #{studentId}  <!-- 只查自己 -->
+    </select>
+
+<!--    <select id="pageClassStudentScoreForAdmin" resultType="org.example.Demo.VO.Score.ClassStudentScoreVO" parameterType="org.example.Demo.DTO.Score.PageQueryClassStudentScoreDTO">-->
+<!--        SELECT-->
+<!--        c.class_name,-->
+<!--        s.student_id,-->
+<!--        s.course_id,-->
+<!--        s.score,-->
+<!--        s.exam_type,-->
+<!--        s.create_time-->
+<!--        FROM score s-->
+<!--        LEFT JOIN user u ON s.student_id = u.id-->
+<!--        LEFT JOIN classes c ON u.class_id = c.id-->
+<!--        <where>-->
+<!--            <if test="className != null and className != ''">-->
+<!--                AND c.class_name = #{className}-->
+<!--            </if>-->
+<!--        </where>-->
+<!--    </select>-->
+
+    <select id="pageCLassStudentScore" resultType="org.example.Demo.VO.Score.ClassStudentScoreVO" parameterType="java.lang.Long">
+        SELECT
+        c.class_name,
+        s.student_id,
+        s.course_id,
+        s.score,
+        s.exam_type,
+        s.create_time
+        FROM score s
+        JOIN `user` u ON s.student_id = u.id
+        JOIN classes c ON u.class_id = c.id
+        <where>
+            <if test="userId != null">
+                AND EXISTS (
+                SELECT 1
+                FROM teacher_course tc
+                WHERE tc.teacher_id = #{userId}
+                AND tc.class_id = c.id
+                AND tc.course_id = s.course_id
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="getClassAverageScore" resultType="org.example.Demo.VO.Score.ClassAvgVO">
+        SELECT
+        c.class_name AS className,
+        AVG(s.score) AS avgScore
+        FROM classes c
+        LEFT JOIN `user` stu ON c.id = stu.class_id AND stu.user_type_enum = 'STUDENT'
+        LEFT JOIN score s ON stu.id = s.student_id
+        GROUP BY c.id, c.class_name
+        ORDER BY avgScore DESC
     </select>
 </mapper>

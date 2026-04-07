@@ -1,7 +1,8 @@
-package com.common.Util;
+package org.example.Demo.VO.Menu;
 
 
 import lombok.Data;
+import org.example.Demo.entity.Menu;
 
 import java.util.ArrayList;
 import java.util.List;

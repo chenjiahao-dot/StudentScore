@@ -1,4 +1,4 @@
-package com.common.Util;
+package org.example.Demo.entity;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;

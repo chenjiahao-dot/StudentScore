@@ -1,5 +1,6 @@
 package org.example.Demo.server.Impl;
 
+import com.alibaba.fastjson.JSON;
 import com.common.Context.BaseContext;
 import com.common.Util.JwtUtil;
 import jakarta.annotation.Resource;
@@ -20,10 +21,18 @@ import org.example.Demo.UserException.AddUserException;
 import org.example.Demo.entity.newUser;
 import org.example.Demo.mapper.UserMapper;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -32,37 +41,61 @@ public class UserImpl implements UserServer {
     private final UserMapper userMapper;
     @Resource
     private JwtUtil jwtUtil;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Value("${file.upload-path}")
+    private String uploadPath;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
     /**
      * 用户注册
      * @param userSignInDTO
      */
     @Override
-    public void signIn(UserSignInDTO userSignInDTO) {
+    public void signIn(UserSignInDTO userSignInDTO, MultipartFile file) throws  Exception {
         newUser user = userMapper.getByMail(userSignInDTO.getMail());
-        newUser classId=userMapper.getClassById(userSignInDTO.getClassId());
+        newUser classId = userMapper.getClassById(userSignInDTO.getClassId());
         if (user != null) {
             throw new AddUserException("用户已存在");
         }
         if (classId == null) {
             throw new ClassException("班级不存在");
         }
-        newUser newUser =new newUser();
-        BeanUtils.copyProperties(userSignInDTO,newUser);
-        newUser.setPassword(DigestUtils.md5DigestAsHex(userSignInDTO.getPassword().getBytes()));
-        newUser.setMobile(userSignInDTO.getMobile());
-        newUser.setUserName(newUser.getName());
-        newUser.setSexEnum(userSignInDTO.getSexEnum());
-        newUser.setUserTypeEnum(userSignInDTO.getUserTypeEnum());
-        newUser.setSexEnum(userSignInDTO.getSexEnum());
-        newUser.setClassId(userSignInDTO.getClassId());
-        newUser.setMail(userSignInDTO.getMail());
-        try{
-            userMapper.insertUser(newUser);
-        }catch (Exception e){
-            throw new AddUserException("新增用户失败，原因:"+e.getMessage());
+        String avatarFileName;
+        if (file != null && !file.isEmpty()) {
+            // 3.1 获取文件后缀
+            String originalFilename = file.getOriginalFilename();
+            String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+
+            // 3.2 生成唯一文件名（UUID，避免重名覆盖）
+            avatarFileName = UUID.randomUUID() + suffix;
+
+            // 3.3 确保目录存在，不存在则创建
+            File folder = new File(uploadPath);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+            file.transferTo(new File(uploadPath + avatarFileName));
+        }else {
+            avatarFileName = "default.png";
         }
-    }
+
+            newUser newUser = new newUser();
+            BeanUtils.copyProperties(userSignInDTO, newUser);
+            newUser.setPassword(DigestUtils.md5DigestAsHex(userSignInDTO.getPassword().getBytes()));
+            newUser.setMobile(userSignInDTO.getMobile());
+            newUser.setUserName(newUser.getName());
+            newUser.setImageAddress(avatarFileName);
+            newUser.setSexEnum(userSignInDTO.getSexEnum());
+            newUser.setUserTypeEnum(userSignInDTO.getUserTypeEnum());
+            newUser.setSexEnum(userSignInDTO.getSexEnum());
+            newUser.setClassId(userSignInDTO.getClassId());
+            newUser.setMail(userSignInDTO.getMail());
+            try {
+                userMapper.insertUser(newUser);
+            } catch (Exception e) {
+                throw new AddUserException("新增用户失败，原因:" + e.getMessage());
+            }
+        }
 
     /**
      * 用户登录
@@ -72,16 +105,16 @@ public class UserImpl implements UserServer {
     @Override
     public String login(LoginRequestUserDTO loginRequestUserDTO) {
         newUser newuser = null;
-        String account = loginRequestUserDTO.getMail();  // 前端统一把账号放 mail 字段
+        String account = loginRequestUserDTO.getMail();
         String inputPwdEncrypted = DigestUtils.md5DigestAsHex(loginRequestUserDTO.getPassword().getBytes());
+
         // 1. 根据邮箱或手机号查询用户
         if (account != null && account.matches("^1[3-9]\\d{9}$")) {
-            // 是手机号 → 按 mobile 查询
-           newuser = userMapper.selectByMobile(account);
+            newuser = userMapper.selectByMobile(account);
         } else {
-            // 不是手机号 → 按 mail 查询
             newuser = userMapper.selectByMail(account);
         }
+
         // 2. 验证用户是否存在
         if (newuser == null) {
             throw new RuntimeException("用户不存在");
@@ -91,9 +124,21 @@ public class UserImpl implements UserServer {
         if (!inputPwdEncrypted.equals(newuser.getPassword())) {
             throw new RuntimeException("密码错误");
         }
+
         BaseContext.setCurrentId(newuser.getId());
-        // 4. 生成token并返回
-        return jwtUtil.generateToken(newuser.getId());
+
+        String token = jwtUtil.generateToken(newuser.getId());
+
+        String redisKey = "login:token:" + newuser.getId();
+        String userJson = JSON.toJSONString(newuser);
+
+        stringRedisTemplate.opsForValue().set(redisKey, userJson, 2, TimeUnit.HOURS);
+        // 存储token与用户ID的映射，用于登出/校验
+        stringRedisTemplate.opsForValue().set("login:token:" + token, String.valueOf(newuser.getId()), 2, TimeUnit.HOURS);
+
+        // 5. 返回token
+        return token;
+
     }
 
 

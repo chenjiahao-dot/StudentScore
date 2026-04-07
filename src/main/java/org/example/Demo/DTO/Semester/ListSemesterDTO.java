@@ -1,15 +1,13 @@
-package org.example.Demo.DTO.Score;
+package org.example.Demo.DTO.Semester;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.example.Demo.enummerate.ExamTypeEnum;
 import org.example.Demo.enummerate.OrderTypeEnum;
+
 @Data
-public class MyScorePateQueryDTO {
-    @Schema(description = "成绩")
-    private String score;
-    @Schema(description = "考试类型")
-    private ExamTypeEnum examType;
+public class ListSemesterDTO {
+    @Schema(description = "学期名称")
+    private String semesterName ;
     @Schema(description = "页码", defaultValue = "1", required = true)
     private Integer page;
     @Schema(description = "每页显示记录数", defaultValue = "10", required = true)

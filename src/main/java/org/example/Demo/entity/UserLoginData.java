@@ -1,4 +1,4 @@
-package com.common.Util;
+package org.example.Demo.entity;
 
 
 
@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.Demo.entity.UserData;
+import org.example.Demo.VO.Menu.MenuVO;
 
 import java.util.List;
 import java.util.Map;

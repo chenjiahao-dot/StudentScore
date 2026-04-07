@@ -23,7 +23,7 @@ public interface CourseMapper {
      * 添加课程
      * @param course
      */
-    @Insert("insert into course(course_name,teacher_name,credit)VALUES (#{courseName},#{teacherName},#{credit} )")
+    @Insert("insert into course(course_name,teacher_name)VALUES (#{courseName},#{teacherName} )")
     void insertCourse(Course course);
 
     /**

@@ -21,13 +21,12 @@ public class AdminController {
     private final UserServer userServer;
     @GetMapping("/{id}")
     @Operation(summary = "根据ID查询用户")
-    @ApiOperationSupport(author = "汪润杰")
+    @ApiOperationSupport(author = "陈嘉豪")
     public Result<User> getById(@PathVariable Long id) {
         log.info("正在查询ID:{}的用户信息", id);
         try {
             User user = userServer.getByID(id);
-            log.info("查询成功");
-            return Result.success(user);
+            return Result.success("查询成功",user);
         } catch (BaseException e) {
             log.info("未查询到ID:{}的用户", id);
             return Result.error("未查询到用户");

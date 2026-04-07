@@ -5,7 +5,7 @@ import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
-import org.example.Demo.DTO.SemesterController.ListSemesterDTO;
+import org.example.Demo.DTO.Semester.ListSemesterDTO;
 import org.example.Demo.VO.Semester.semesterListAllVO;
 import org.example.Demo.annotation.AutoFill;
 import org.example.Demo.entity.Semester;

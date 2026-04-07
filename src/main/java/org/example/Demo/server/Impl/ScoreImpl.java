@@ -11,14 +11,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.Demo.Common.BaseException;
 import org.example.Demo.Common.ScoreException;
-import org.example.Demo.DTO.Score.AddScoreDTO;
-import org.example.Demo.DTO.Score.MyScorePateQueryDTO;
-import org.example.Demo.DTO.Score.ScorePageQueryDTO;
-import org.example.Demo.DTO.Score.UpdateStudentScoreDTO;
+import org.example.Demo.DTO.Score.*;
 import org.example.Demo.UserException.AddUserException;
+import org.example.Demo.VO.Score.ClassAvgVO;
+import org.example.Demo.VO.Score.ClassStudentScoreVO;
 import org.example.Demo.VO.Score.MyScoreVO;
 import org.example.Demo.VO.Score.ScoreVO;
-import org.example.Demo.entity.Course;
 import org.example.Demo.entity.Score;
 import org.example.Demo.enummerate.OrderTypeEnum;
 import org.example.Demo.enummerate.UserTypeEnum;
@@ -133,7 +131,7 @@ public class ScoreImpl implements ScoreServer {
         }
         if (userTypeEnum == UserTypeEnum.TEACHER) {
             Long classId = scoreMapper.selectClassIdByStudentId(oldScore.getStudentId());
-            int count = scoreMapper.checkTeacherCourseClass(userId, oldScore.getCourseId(), classId);
+            int count = scoreMapper.checkTeacherCourseClass(userId, String.valueOf(oldScore.getCourseId()), classId);
             if (count == 0) {
                 throw new RuntimeException("你无权修改该班级/课程");
             }
@@ -152,13 +150,19 @@ public class ScoreImpl implements ScoreServer {
      */
     @Override
     public Result deleteStudentScore(Long id) {
-        Result result = new Result<>();
-        if (scoreMapper.selectById(id)) {
-            scoreMapper.deleteById(id);
-            result.setMsg("删除成功");
+        UserTypeEnum userTypeEnum=BaseContext.getCurrentPrimaryUserEnum();
+        if (userTypeEnum != UserTypeEnum.STUDENT) {
+            Result result = new Result<>();
+            if (scoreMapper.selectById(id)) {
+                scoreMapper.deleteById(id);
+                result.setMsg("删除成功");
+                return result;
+            }
             return result;
+        }else{
+            throw new ScoreException("学生无法删除成绩");
         }
-        return result;
+
     }
 
     /**
@@ -168,38 +172,44 @@ public class ScoreImpl implements ScoreServer {
      */
     @Override
     public ScoreVO getStudentScoreById(Long id) {
-        ScoreVO scoreVO = scoreMapper.selectScore(id);
-        if (scoreMapper.countWarehouseGoods(id) == 0) {
-            throw new BaseException("学生成绩详情不存在");
+        UserTypeEnum userTypeEnum= BaseContext.getCurrentPrimaryUserEnum();
+        if (userTypeEnum != UserTypeEnum.STUDENT) {
+            ScoreVO scoreVO = scoreMapper.selectScore(id);
+            if (scoreMapper.countWarehouseGoods(id) == 0) {
+                throw new BaseException("学生成绩详情不存在");
+            }
+            return scoreVO;
+        }else{
+            throw new ScoreException("只能查询自己的成绩");
         }
-        return scoreVO;
     }
 
     /**
      * 分页查询我的成绩
-     * @param myScorePateQueryDTO
+     * @param myScorePageQueryDTO
      * @return
      */
     @Override
-    public PageResult<MyScoreVO> pageMyScore(MyScorePateQueryDTO myScorePateQueryDTO) {
+    public PageResult<MyScoreVO> pageMyScore(MyScorePageQueryDTO myScorePageQueryDTO) {
         Long  userId = BaseContext.getCurrentId();
         UserTypeEnum userTypeEnum= BaseContext.getCurrentPrimaryUserEnum();
         Long scoreId=scoreMapper.selectMyScoreById(userId);
         if (userTypeEnum!=UserTypeEnum.STUDENT){
             throw new ScoreException("只有学生可以查询到自己的成绩");
         }
+
         if (scoreId==null){
-            throw new ScoreException("该学生暂无成绩");
+            throw new ScoreException("暂无成绩");
         }
-        PageHelper.startPage(myScorePateQueryDTO.getPage(), myScorePateQueryDTO.getPageSize());
+        PageHelper.startPage(myScorePageQueryDTO.getPage(), myScorePageQueryDTO.getPageSize());
         String sortField = "id";
         String sortOrder = "asc";
         // 如果前端传了字段 → 替换
-        if (StrUtil.isNotBlank(myScorePateQueryDTO.getSortField())) {
-            sortField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, myScorePateQueryDTO.getSortField());
+        if (StrUtil.isNotBlank(myScorePageQueryDTO.getSortField())) {
+            sortField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, myScorePageQueryDTO.getSortField());
         }
         // 如果前端传了 ASC → 改成正序
-        if (myScorePateQueryDTO.getOrderType() == OrderTypeEnum.DESC) {
+        if (myScorePageQueryDTO.getOrderType() == OrderTypeEnum.DESC) {
             sortOrder = "desc";
         }
         PageHelper.orderBy(sortField + " " + sortOrder);
@@ -209,5 +219,57 @@ public class ScoreImpl implements ScoreServer {
 
         return new PageResult<>(page.getTotal(), page.getResult());
     }
+
+    /**
+     * 分页查询班级学生成绩
+     * @param pageQueryClassStudentScoreDTO
+     * @return
+     */
+    @Override
+    public PageResult<ClassStudentScoreVO> pageCLassStudentScore(PageQueryClassStudentScoreDTO pageQueryClassStudentScoreDTO) {
+        Long userId = BaseContext.getCurrentId();
+        UserTypeEnum userType = BaseContext.getCurrentPrimaryUserEnum();
+        if (userType==UserTypeEnum.STUDENT) {
+            throw new ScoreException("无权限访问班级成绩");
+        }
+
+        PageHelper.startPage(pageQueryClassStudentScoreDTO.getPage(), pageQueryClassStudentScoreDTO.getPageSize());
+        String sortField = "s.id";
+        String sortOrder = "asc";
+        // 如果前端传了字段 → 替换
+        if (StrUtil.isNotBlank(pageQueryClassStudentScoreDTO.getSortField())) {
+            sortField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, pageQueryClassStudentScoreDTO.getSortField());
+        }
+        // 如果前端传了 ASC → 改成正序
+        if (pageQueryClassStudentScoreDTO.getOrderType() == OrderTypeEnum.DESC) {
+            sortOrder = "desc";
+        }
+        PageHelper.orderBy(sortField + " " + sortOrder);
+        List<ClassStudentScoreVO> list;
+        if (userType == UserTypeEnum.ADMIN) {
+            list = scoreMapper.pageCLassStudentScore(null);
+        } else {
+            list = scoreMapper.pageCLassStudentScore(userId);
+        }
+
+        Page<ClassStudentScoreVO> page = (Page<ClassStudentScoreVO>) list;
+        return new PageResult<>(page.getTotal(), page.getResult());
+    }
+    /**
+     * 查询班级平均分
+     * @return
+     */
+    @Override
+    public List<ClassAvgVO> getClassAvg() {
+        UserTypeEnum userTypeEnum= BaseContext.getCurrentPrimaryUserEnum();
+        if (userTypeEnum!=UserTypeEnum.STUDENT) {
+            return scoreMapper.getClassAverageScore();
+        }else{
+            throw new ScoreException("无权查看平均分");
+        }
+    }
+
+
+
 
 }

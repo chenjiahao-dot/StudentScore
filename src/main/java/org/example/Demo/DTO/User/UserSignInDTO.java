@@ -17,6 +17,8 @@ public class UserSignInDTO {
     private String name;
     @Schema(description = "用户名(用户名可修改)")
     private String userName;
+    @Schema(description = "图片头像地址")
+    private String imageAddress;
     @Schema(description = "STUDENT-学生，TEACHER-老师，ADMIN-管理员")
     private UserTypeEnum userTypeEnum;
     @Schema(description = "性别枚举对象WOMAN女,MAN男")

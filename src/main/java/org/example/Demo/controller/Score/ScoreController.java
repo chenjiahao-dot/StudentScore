@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcel;
 import com.common.Context.BaseContext;
 import com.common.Result.PageResult;
 import com.common.Result.Result;
+import com.common.listener.ScoreImportListener;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,17 +12,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.xmlbeans.UserType;
 import org.example.Demo.Common.BaseException;
 import org.example.Demo.Common.ScoreException;
 import org.example.Demo.DTO.Score.*;
-import org.example.Demo.VO.Score.MyScoreVO;
-import org.example.Demo.VO.Score.ScoreVO;
+import org.example.Demo.VO.Score.*;
+import org.example.Demo.VO.User.UserExcelVO;
 import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.mapper.ScoreMapper;
 import org.example.Demo.server.ScoreServer;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -151,19 +152,70 @@ public class ScoreController {
     }
     /**
      * 分页查询我的成绩
-     * @param myScorePateQueryDTO
+     * @param myScorePageQueryDTO
      * @return
      */
     @PostMapping("/PageMyScore")
     @Operation(summary = "分页查询我的成绩")
     @ApiOperationSupport(author = "陈嘉豪")
-    public Result<PageResult<MyScoreVO>> pageWarehouse(@RequestBody MyScorePateQueryDTO myScorePateQueryDTO){
+    public Result<PageResult<MyScoreVO>> pageWarehouse(@RequestBody MyScorePageQueryDTO myScorePageQueryDTO){
         log.info("开始分页查询我的成绩");
         try{
-            PageResult<MyScoreVO> pageResult= scoreServer.pageMyScore(myScorePateQueryDTO);
+            PageResult<MyScoreVO> pageResult= scoreServer.pageMyScore(myScorePageQueryDTO);
             return Result.success("查询成功",pageResult);
         }catch (BaseException e){
             return Result.error(e.getMessage());
         }
     }
+    /**
+     * 分页查询班级成绩
+     * @param pageQueryClassStudentScoreDTO
+     * @return
+     */
+    @PostMapping("/PageClassStudentScore")
+    @Operation(summary = "分页查询班级学生成绩")
+    @ApiOperationSupport(author = "陈嘉豪")
+    public Result<PageResult<ClassStudentScoreVO>> pageClassScore(@RequestBody PageQueryClassStudentScoreDTO pageQueryClassStudentScoreDTO){
+        log.info("开始分页查询班级学生成绩");
+        try{
+            PageResult<ClassStudentScoreVO> pageResult= scoreServer.pageCLassStudentScore(pageQueryClassStudentScoreDTO);
+            return Result.success("查询成功",pageResult);
+        }catch (BaseException e){
+            return Result.error(e.getMessage());
+        }
+    }
+    /**
+     * 查询班级平均分
+     * @param
+     * @return
+     */
+    @GetMapping("/getClassAvg")
+    @Operation(summary = "查询班级平均分")
+    @ApiOperationSupport(author = "陈嘉豪")
+    public Result<List<ClassAvgVO>> getClassAvg() {
+        return Result.success("查询成功",scoreServer.getClassAvg());
+    }
+    /**
+     * 批量导入成绩Excel
+     */
+    @PostMapping("/importScore")
+    @Operation(summary = "批量导入成绩")
+    @ApiOperationSupport(author = "陈嘉豪")
+    public Result<?> importScore(MultipartFile file) throws Exception {
+        // 读取Excel并导入数据库
+        UserTypeEnum userTypeEnum= BaseContext.getCurrentPrimaryUserEnum();
+        if (userTypeEnum==UserTypeEnum.ADMIN){
+            EasyExcel.read(file.getInputStream(),
+                            ScoreExcelVO.class,
+                            new ScoreImportListener(scoreMapper))
+                    .sheet()
+                    .doRead();
+
+            return Result.success("成绩数据导入成功");
+        }else{
+            throw new ScoreException("无权导入成绩，请找管理员!");
+        }
+
+    }
+
 }
