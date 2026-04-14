@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须与Mapper接口全类名一致 -->
+<mapper namespace="org.example.Demo.mapper.PermissionMapper">
+    <select id="pageQueryPermission" resultType="org.example.Demo.VO.Permission.PermissionVO"
+            parameterType="org.example.Demo.DTO.Permission.PermissionPageQueryDTO">
+        select * from permission
+        <where>
+            <if test="name!=null">name=#{name}</if>
+        </where>
+    </select>
+
+
+
+    <select id="getPermissionsByUserId" resultType="java.lang.String">
+        SELECT p.path
+        FROM user u
+        JOIN role r ON LOWER(u.user_type_enum) = LOWER(r.name)
+        JOIN role_permission rp ON r.id = rp.role_id
+        JOIN permission p ON rp.permission_id = p.id
+        WHERE u.id = #{userId}
+    </select>
+</mapper>

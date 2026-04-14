@@ -22,7 +22,7 @@ import org.example.Demo.enummerate.OrderTypeEnum;
 import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.enummerate.ExamTypeEnum;
 import org.example.Demo.mapper.ScoreMapper;
-import org.example.Demo.server.ScoreServer;
+import org.example.Demo.server.ScoreService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +33,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ScoreImpl implements ScoreServer {
+public class ScoreServiceImpl implements ScoreService {
     private final ScoreMapper scoreMapper;
 
     /**

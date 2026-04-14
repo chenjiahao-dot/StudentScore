@@ -25,4 +25,48 @@
         SET status_enum = #{status}
         WHERE id = #{id}
     </update>
+
+    <select id="pageUser" resultType="org.example.Demo.VO.User.UserVO">
+        SELECT
+        u.id,
+        u.name,
+        u.user_name AS userName,
+        u.image_address AS imageAddress,
+        u.mail,
+        u.mobile,
+        u.user_type_enum AS userTypeEnum,
+        u.sex_enum AS sexEnum,
+        r.primary_role_enum AS primaryRoleEnum
+        FROM user u
+        INNER JOIN user_role ur ON u.id = ur.user_id
+        INNER JOIN role r ON ur.role_id = r.id
+        <if test="name != null">
+            AND user.name like concat("%",#{name},"%")
+        </if>
+    </select>
+
+    <select id="selectPermissionById" resultType="org.example.Demo.entity.User">
+        SELECT p.path
+        FROM permission p
+        INNER JOIN role_permission rp ON p.id = rp.permission_id
+        WHERE rp.role_id = #{roleId}
+    </select>
+
+    <insert id="AddRole" parameterType="org.example.Demo.DTO.User.AddUserRoleDTO">
+        insert into user_role(role_id,user_id) values
+        <foreach collection="userIdList" item="userIdList" separator=",">
+            (#{roleId},#{userIdList})
+        </foreach>
+    </insert>
+
+    <select id="getIdByRolePermissions" resultType="java.lang.Long" parameterType="org.example.Demo.DTO.User.AddUserRoleDTO">
+        select id from user_role
+        <where>
+            role_id = #{roleId}
+            and user_id in
+            <foreach collection="userIdList" item="userId" open="(" close=")" separator=",">
+                #{userId}
+            </foreach>
+        </where>
+    </select>
 </mapper>

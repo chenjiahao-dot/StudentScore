@@ -17,6 +17,7 @@ public enum UserTypeEnum {
      */
 
     STUDENT("学生", "STUDENT"),
+    CLASSTEACHER("班主任", "CLASSTEACHER"),
     TEACHER("老师", "TEACHER"),
     ADMIN("管理员", "ADMIN");
 

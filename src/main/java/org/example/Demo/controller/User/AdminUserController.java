@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.Demo.Common.BaseException;
 import org.example.Demo.entity.User;
-import org.example.Demo.server.UserServer;
+import org.example.Demo.server.UserService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,15 +17,15 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "管理员相关接口")
 @CrossOrigin
 @RequiredArgsConstructor
-public class AdminController {
-    private final UserServer userServer;
+public class AdminUserController {
+    private final UserService userService;
     @GetMapping("/{id}")
     @Operation(summary = "根据ID查询用户")
     @ApiOperationSupport(author = "陈嘉豪")
     public Result<User> getById(@PathVariable Long id) {
         log.info("正在查询ID:{}的用户信息", id);
         try {
-            User user = userServer.getByID(id);
+            User user = userService.getByID(id);
             return Result.success("查询成功",user);
         } catch (BaseException e) {
             log.info("未查询到ID:{}的用户", id);

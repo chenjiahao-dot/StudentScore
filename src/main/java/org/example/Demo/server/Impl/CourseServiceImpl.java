@@ -15,12 +15,13 @@ import org.example.Demo.DTO.Course.AddCourseDTO;
 import org.example.Demo.DTO.Course.DeleteCourseDTO;
 import org.example.Demo.DTO.Course.ListCourseDTO;
 import org.example.Demo.DTO.Course.UpdateCourseDTO;
-import org.example.Demo.VO.Course.courseListAllVO;
+import org.example.Demo.VO.Course.CourseVO;
+import org.example.Demo.VO.Course.CourseListAllVO;
 import org.example.Demo.entity.Course;
 import org.example.Demo.enummerate.OrderTypeEnum;
 import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.mapper.CourseMapper;
-import org.example.Demo.server.CourseServer;
+import org.example.Demo.server.CourseService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CourseImpl implements CourseServer {
+public class CourseServiceImpl implements CourseService {
     private final CourseMapper courseMapper;
 
     /**
@@ -58,7 +59,7 @@ public class CourseImpl implements CourseServer {
      * @return
      */
     @Override
-    public PageResult<courseListAllVO> listCourse(ListCourseDTO listCourseDTO) {
+    public PageResult<CourseListAllVO> listCourse(ListCourseDTO listCourseDTO) {
         UserTypeEnum userTypeEnum=BaseContext.getCurrentPrimaryUserEnum();
         if (userTypeEnum==UserTypeEnum.ADMIN) {
             PageHelper.startPage(listCourseDTO.getPage(), listCourseDTO.getPageSize());
@@ -73,8 +74,8 @@ public class CourseImpl implements CourseServer {
                 sortOrder = "asc";
             }
             PageHelper.orderBy(sortField + " " + sortOrder);
-            List<courseListAllVO> list = courseMapper.pageQueryCourse(listCourseDTO);
-            Page<courseListAllVO> page = (Page<courseListAllVO>) list;
+            List<CourseListAllVO> list = courseMapper.pageQueryCourse(listCourseDTO);
+            Page<CourseListAllVO> page = (Page<CourseListAllVO>) list;
 
             return new PageResult<>(page.getTotal(), page.getResult());
         }else{
@@ -140,5 +141,23 @@ public class CourseImpl implements CourseServer {
             throw new CourseException("无权限修改课程信息，请找管理员！");
         }
         }
+
+    /**
+     * 查询自己任教的课程
+     * @return
+     */
+    @Override
+    public List<CourseVO> getMyTeachCourses() {
+        // 获取当前登录用户ID
+        Long userId = BaseContext.getCurrentId();
+        UserTypeEnum userTypeEnum= BaseContext.getCurrentPrimaryUserEnum();
+        if (userTypeEnum==UserTypeEnum.TEACHER){
+            // 查询该老师任教的所有课程
+            return courseMapper.getMyTeachCourses(userId);
+        }if (userTypeEnum==UserTypeEnum.ADMIN){
+            return courseMapper.getAllCourses(userId);
+        }
+        throw new CourseException("无权查看课程");
+    }
 
 }

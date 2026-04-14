@@ -5,8 +5,10 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.example.Demo.DTO.User.AddUserRoleDTO;
 import org.example.Demo.DTO.User.UpdateUserStatus;
 import org.example.Demo.DTO.User.UserPageQueryDTO;
+import org.example.Demo.VO.User.UserVO;
 import org.example.Demo.VO.User.userMessageVO;
 import org.example.Demo.annotation.AutoFill;
 import org.example.Demo.entity.Users;
@@ -115,4 +117,13 @@ public interface UserMapper {
     User getById(Long id);
 
 
+    List<UserVO> pageUser(UserPageQueryDTO pageQueryDTO);
+
+    User selectPermissionById(Long userId);
+    @Select("select user_id from user_role where role_id=#{roleId}")
+    List<Long> getRole(Long roleId);
+    @AutoFill(OperationType.INSERT)
+    void AddRole(AddUserRoleDTO addUserRoleDTO);
+
+    List<Long> getIdByRolePermissions(AddUserRoleDTO addUserRoleDTO);
 }

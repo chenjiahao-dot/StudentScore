@@ -9,4 +9,8 @@ public class ClassAvgVO {
     private String className;
     @Schema(description = "平均分")
     private Long avgScore;
+    @Schema(description = "最高分")
+    private Float maxScore;
+    @Schema(description = "最低分")
+    private Float minScore;
 }

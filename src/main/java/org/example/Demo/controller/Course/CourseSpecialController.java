@@ -12,19 +12,24 @@ import org.example.Demo.DTO.Course.AddCourseDTO;
 import org.example.Demo.DTO.Course.DeleteCourseDTO;
 import org.example.Demo.DTO.Course.ListCourseDTO;
 import org.example.Demo.DTO.Course.UpdateCourseDTO;
-import org.example.Demo.VO.Course.courseListAllVO;
-import org.example.Demo.server.CourseServer;
+import org.example.Demo.DTO.Score.PageQueryClassStudentScoreDTO;
+import org.example.Demo.VO.Course.CourseVO;
+import org.example.Demo.VO.Course.CourseListAllVO;
+import org.example.Demo.VO.Score.ClassStudentScoreVO;
+import org.example.Demo.server.CourseService;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/course/basics")
+@RequestMapping("/course")
 @Slf4j
-@Tag(name = "课程相关接口")
+@Tag(name = "课程管理")
 @CrossOrigin
 @RequiredArgsConstructor
-public class courseController {
-    private final CourseServer courseServer;
+public class CourseSpecialController {
+    private final CourseService courseService;
     /**
      * 新增课程
      *
@@ -37,23 +42,23 @@ public class courseController {
     public Result addCourse(@RequestBody AddCourseDTO addCourseDTO) {
         if (StringUtils.hasText(addCourseDTO.getCourseName())
                 && StringUtils.hasText(addCourseDTO.getTeacherName())) {
-            courseServer.addCourse(addCourseDTO);
+            courseService.addCourse(addCourseDTO);
             return Result.success("新增成功", addCourseDTO);
         } else {
             throw new BaseException("信息不完整或为空");
         }
     }
     /**
-     * 列出所有课程信息
+     * 分页查询所有课程信息
      */
-    @PostMapping("/listCourse")
-    @Operation(summary = "列出所有课程")
+    @PostMapping("/pageCourse")
+    @Operation(summary = "分页查询所有课程")
     @ApiOperationSupport(author = "陈嘉豪")
-    public Result<PageResult<courseListAllVO>> listClass(@RequestBody ListCourseDTO  listCourseDTO) {
+    public Result<PageResult<CourseListAllVO>> listClass(@RequestBody ListCourseDTO listCourseDTO) {
         log.info("列出所有课程信息");
         {
-            //列出所有班级
-            PageResult<courseListAllVO> pageResult = courseServer.listCourse(listCourseDTO);
+            //分页查询所有班级
+            PageResult<CourseListAllVO> pageResult = courseService.listCourse(listCourseDTO);
             return Result.success("查询成功", pageResult);
         }
     }
@@ -66,10 +71,10 @@ public class courseController {
     @PostMapping("/deleteCourse")
     @Operation(summary = "批量删除课程")
     @ApiOperationSupport(author = "陈嘉豪")
-    public Result deleteCourse(@RequestBody DeleteCourseDTO  deleteCourseDTO) {
+    public Result deleteCourse(@RequestBody DeleteCourseDTO deleteCourseDTO) {
         Result result = new Result<>();
         try {
-            return courseServer.deleteCourse(deleteCourseDTO);
+            return courseService.deleteCourse(deleteCourseDTO);
 
         } catch (Exception e) {
             return Result.error("删除失败，可能是课程不存在");
@@ -85,7 +90,19 @@ public class courseController {
     @Operation(summary = "对课程进行修改")
     @ApiOperationSupport(author = "陈嘉豪")
     public Result updateWarehouse(@RequestBody UpdateCourseDTO updateCourseDTO) {
-        courseServer.updateCourse(updateCourseDTO);
+        courseService.updateCourse(updateCourseDTO);
         return Result.success("修改成功", updateCourseDTO);
     }
+
+    /**
+     * 分页查询自己任教的课程
+     * @return
+     */
+    @GetMapping("/getMyCourses")
+    @Operation(summary = "查询自己任教的课程")
+    @ApiOperationSupport(author = "陈嘉豪")
+    public Result<List<CourseVO>> getMyCourses() {
+        return Result.success("查询成功",courseService.getMyTeachCourses());
+    }
+
 }

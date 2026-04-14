@@ -5,8 +5,11 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
 import org.example.Demo.DTO.Class.ListClassDTO;
-import org.example.Demo.VO.Class.classListAllVO;
+import org.example.Demo.VO.Class.ClassListAllVO;
+import org.example.Demo.VO.Class.PageTeacherCLassStudentVO;
 import org.example.Demo.entity.Class;
+
+import java.util.List;
 
 public interface ClassMapper {
     /**
@@ -30,7 +33,7 @@ public interface ClassMapper {
      * @return
      */
     @Select("select * from classes ")
-    Page<classListAllVO> pageQueryclass(ListClassDTO listClassDTO);
+    Page<ClassListAllVO> pageQueryclass(ListClassDTO listClassDTO);
 
     /**
      * 统计指定id的班级数量
@@ -51,4 +54,11 @@ public interface ClassMapper {
      * @param clazz
      */
     void updateClass(Class clazz);
+
+    /**
+     * 分页查询老师班级学生
+     * @param o
+     * @return
+     */
+    List<PageTeacherCLassStudentVO> pageTeacherCLassStudent(Object o);
 }

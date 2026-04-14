@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace必须与Mapper接口全类名一致 -->
+<mapper namespace="org.example.Demo.mapper.RoleMapper">
+    <insert id="AddPermissions" parameterType="org.example.Demo.DTO.Role.AddRolePermissionDTO">
+        insert into role_permission(role_id,permission_id) values
+        <foreach collection="permissionIdList" item="permissionIdList" separator=",">
+            (#{roleId},#{permissionIdList})
+        </foreach>
+    </insert>
+    <select id="getIdByRolePermissions" resultType="java.lang.Long"
+            parameterType="org.example.Demo.DTO.Role.AddRolePermissionDTO">
+        select id from role_permission
+        <where>
+            role_id = #{roleId}
+            and permission_id in
+            <foreach collection="permissionIdList" item="permissionId" open="(" close=")" separator=",">
+                #{permissionId}
+            </foreach>
+        </where>
+    </select>
+    <select id="pageQueryPermission" resultType="org.example.Demo.VO.Role.RolesListAllVO"
+            parameterType="org.example.Demo.DTO.Role.RolePageQueryDTO">
+        select * from role
+        <where>
+            id
+            <if test="chineseName!=null">
+                and chinese_name like concat("%",
+                #{chineseName},
+                "%"
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="getPressionById" resultType="org.example.Demo.VO.Role.PressionVO" parameterType="java.lang.Long">
+        SELECT p.*, p.primary_role_enum AS primaryRoleEnum
+        FROM permission p
+        JOIN role_permission rp ON p.id = rp.permission_id
+        WHERE rp.role_id = #{roleId}
+    </select>
+
+    <select id="selectPermissionsByRoleId" resultType="org.example.Demo.VO.Role.PressionVO">
+        SELECT
+        p.id,
+        p.name,
+        p.chinese_name AS chineseName,
+        p.path,
+        p.comment,
+        r.primary_role_enum AS primaryRoleEnum
+        FROM permission p
+        INNER JOIN role_permission rp
+        ON p.id = rp.permission_id
+        INNER JOIN role r
+        ON rp.role_id = r.id
+        WHERE rp.role_id = #{id}
+    </select>
+</mapper>

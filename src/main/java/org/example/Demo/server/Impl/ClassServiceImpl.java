@@ -11,14 +11,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.Demo.Common.ClassException;
 import org.example.Demo.Common.ScoreException;
-import org.example.Demo.DTO.Class.AddClassDTO;
-import org.example.Demo.DTO.Class.DeleteClassesDTO;
-import org.example.Demo.DTO.Class.ListClassDTO;
-import org.example.Demo.DTO.Class.UpdateClassDTO;
-import org.example.Demo.VO.Class.classListAllVO;
+import org.example.Demo.DTO.Class.*;
+import org.example.Demo.VO.Class.ClassListAllVO;
+import org.example.Demo.VO.Class.PageTeacherCLassStudentVO;
+import org.example.Demo.VO.Score.ClassStudentScoreVO;
 import org.example.Demo.enummerate.OrderTypeEnum;
 import org.example.Demo.enummerate.UserTypeEnum;
-import org.example.Demo.server.ClassServer;
+import org.example.Demo.server.ClassService;
 import org.example.Demo.entity.Class;
 import org.example.Demo.mapper.ClassMapper;
 import org.springframework.beans.BeanUtils;
@@ -29,7 +28,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ClassImpl implements ClassServer {
+public class ClassServiceImpl implements ClassService {
     private final ClassMapper classMapper;
 
     /**
@@ -60,7 +59,7 @@ public class ClassImpl implements ClassServer {
      * 查询所有班级信息
      */
     @Override
-    public PageResult<classListAllVO> listClass(ListClassDTO listClassDTO) {
+    public PageResult<ClassListAllVO> listClass(ListClassDTO listClassDTO) {
         PageHelper.startPage(listClassDTO.getPage(), listClassDTO.getPageSize());
         String sortField = "id";
         String sortOrder = "desc";
@@ -73,8 +72,8 @@ public class ClassImpl implements ClassServer {
             sortOrder = "asc";
         }
         PageHelper.orderBy(sortField + " " + sortOrder);
-        List<classListAllVO> list = classMapper.pageQueryclass(listClassDTO);
-        Page<classListAllVO> page = (Page<classListAllVO>) list;
+        List<ClassListAllVO> list = classMapper.pageQueryclass(listClassDTO);
+        Page<ClassListAllVO> page = (Page<ClassListAllVO>) list;
 
         return new PageResult<>(page.getTotal(), page.getResult());
     }
@@ -115,6 +114,38 @@ public class ClassImpl implements ClassServer {
         Class clazz=new Class();
         BeanUtils.copyProperties(updateClassDTO,clazz);
         classMapper.updateClass(clazz);
+    }
+
+    /**
+     * 分页查询班主任班级学生
+     * @param pageTeacherClassStudentDTO
+     * @return
+     */
+    @Override
+    public PageResult<PageTeacherCLassStudentVO> pageTeacherClassStudent(PageTeacherClassStudentDTO pageTeacherClassStudentDTO) {
+        Long userId = BaseContext.getCurrentId();
+        UserTypeEnum userType = BaseContext.getCurrentPrimaryUserEnum();
+        PageHelper.startPage(pageTeacherClassStudentDTO.getPage(), pageTeacherClassStudentDTO.getPageSize());
+        String sortField = "name";
+        String sortOrder = "asc";
+        // 如果前端传了字段 → 替换
+        if (StrUtil.isNotBlank(pageTeacherClassStudentDTO.getSortField())) {
+            sortField = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, pageTeacherClassStudentDTO.getSortField());
+        }
+        // 如果前端传了 ASC → 改成正序
+        if (pageTeacherClassStudentDTO.getOrderType() == OrderTypeEnum.DESC) {
+            sortOrder = "desc";
+        }
+        PageHelper.orderBy(sortField + " " + sortOrder);
+        List<PageTeacherCLassStudentVO> list;
+        if (userType == UserTypeEnum.ADMIN) {
+            list = classMapper.pageTeacherCLassStudent(null);
+        } else {
+            list = classMapper.pageTeacherCLassStudent(userId);
+        }
+
+        Page<PageTeacherCLassStudentVO> page = (Page<PageTeacherCLassStudentVO>) list;
+        return new PageResult<>(page.getTotal(), page.getResult());
     }
 
 

@@ -2,13 +2,17 @@ package org.example.Demo.mapper;
 
 import com.common.enumeration.OperationType;
 import com.github.pagehelper.Page;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
 import org.example.Demo.DTO.Course.ListCourseDTO;
-import org.example.Demo.VO.Course.courseListAllVO;
+import org.example.Demo.VO.Course.CourseVO;
+import org.example.Demo.VO.Course.CourseListAllVO;
 import org.example.Demo.annotation.AutoFill;
 import org.example.Demo.entity.Course;
+
+import java.util.List;
 
 public interface CourseMapper {
     /**
@@ -32,7 +36,7 @@ public interface CourseMapper {
      * @return
      */
     @Select("select * from course")
-    Page<courseListAllVO> pageQueryCourse(ListCourseDTO listCourseDTO);
+    Page<CourseListAllVO> pageQueryCourse(ListCourseDTO listCourseDTO);
 
     /**
      * 统计指定id的课程数量
@@ -63,4 +67,13 @@ public interface CourseMapper {
      */
     @Select("select name from user where name=#{teacherName} ")
     Course selectTeacherById(String teacher);
+
+    /**
+     * 查询自己任教的课程
+     * @param userId
+     * @return
+     */
+    List<CourseVO> getMyTeachCourses(@Param("userId") Long userId);
+
+    List<CourseVO> getAllCourses(Long userId);
 }

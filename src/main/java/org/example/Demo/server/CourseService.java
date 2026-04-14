@@ -6,14 +6,19 @@ import org.example.Demo.DTO.Course.AddCourseDTO;
 import org.example.Demo.DTO.Course.DeleteCourseDTO;
 import org.example.Demo.DTO.Course.ListCourseDTO;
 import org.example.Demo.DTO.Course.UpdateCourseDTO;
-import org.example.Demo.VO.Course.courseListAllVO;
+import org.example.Demo.VO.Course.CourseVO;
+import org.example.Demo.VO.Course.CourseListAllVO;
 
-public interface CourseServer {
+import java.util.List;
+
+public interface CourseService {
     void addCourse(AddCourseDTO addCourseDTO);
 
-    PageResult<courseListAllVO> listCourse(ListCourseDTO listCourseDTO);
+    PageResult<CourseListAllVO> listCourse(ListCourseDTO listCourseDTO);
 
     Result deleteCourse(DeleteCourseDTO deleteCourseDTO);
 
     void updateCourse(UpdateCourseDTO updateCourseDTO);
+
+    List<CourseVO> getMyTeachCourses();
 }

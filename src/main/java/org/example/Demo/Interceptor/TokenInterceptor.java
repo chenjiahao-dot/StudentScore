@@ -1,4 +1,4 @@
-package org.example.Demo.Token;
+package org.example.Demo.Interceptor;
 
 import com.common.Context.BaseContext;
 import com.common.Util.JwtUtil;
@@ -58,8 +58,6 @@ public class TokenInterceptor implements HandlerInterceptor {
             }
             Users users=userMapper.selectById(userId);
             UserTypeEnum userTypeEnum=UserTypeEnum.valueOf(users.getUserTypeEnum());
-            // 可选：将用户ID存入请求属性，供后续接口使用
-
             BaseContext.setCurrentId(userId);
             BaseContext.setUCurrentPrimaryUserEnum(userTypeEnum);
             request.setAttribute("userId", userId);

@@ -10,7 +10,7 @@ import org.example.Demo.VO.Score.ScoreVO;
 
 import java.util.List;
 
-public interface ScoreServer {
+public interface ScoreService {
     void addScore(AddScoreDTO addClassDTO);
 
     PageResult<ScoreVO> pageScore(ScorePageQueryDTO scorePageQueryDTO);

@@ -1,6 +1,7 @@
 package org.example.Demo.config;
 
-import org.example.Demo.Token.TokenInterceptor;
+import org.example.Demo.Interceptor.PermissionInterceptor;
+import org.example.Demo.Interceptor.TokenInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +11,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
+    @Autowired
+    private PermissionInterceptor permissionInterceptor; // 注入权限拦截器
     @Autowired
     private TokenInterceptor tokenInterceptor;
     @Value("${file.upload-path}")
@@ -30,17 +32,26 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(tokenInterceptor)
-                .addPathPatterns("/**") // 拦截所有请求
-                .excludePathPatterns( // 排除不需要拦截的接口
-                        "/user/Login", // 登录接口
-                        "/user/register", // 注册接口
-                        // 可选：排除接口文档相关路径（如Knife4j/Swagger）
+                .addPathPatterns("/**")
+                .excludePathPatterns(
+                        "/user/Login",
+                        "/user/register",
                         "/doc.html",
                         "/swagger-ui/**",
                         "/v3/api-docs/**"
                 );
-
+        // 2. 再注册权限拦截器（登录通过后，再校验权限）
+        registry.addInterceptor(permissionInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns(
+                        "/user/Login",
+                        "/user/register",
+                        "/doc.html",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**"
+                );
     }
+
 
 
 }

@@ -2,30 +2,24 @@ package org.example.Demo.controller.User;
 
 import com.common.Context.BaseContext;
 import com.common.Util.JwtUtil;
-import com.common.Util.MailUtil;
 
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.Demo.Common.EmailNotFoundException;
-import org.example.Demo.Common.UserVerificationCodeException;
 import org.example.Demo.DTO.User.LoginRequestUserDTO;
 import org.example.Demo.DTO.User.UserRePasswordDTO;
 import org.example.Demo.DTO.User.UserSignInDTO;
 import com.common.Result.Result;
 import org.example.Demo.enummerate.SexEnum;
 import org.example.Demo.enummerate.UserTypeEnum;
-import org.example.Demo.server.UserServer;
+import org.example.Demo.server.UserService;
 import org.example.Demo.mapper.UserMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
-import jakarta.mail.MessagingException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,7 +37,7 @@ import java.util.UUID;
 @CrossOrigin
 @RequiredArgsConstructor
 public class UserController {
-    private final UserServer userServer;
+    private final UserService userService;
     private final UserMapper userMapper;
     /**
      * Redis
@@ -90,7 +84,7 @@ public class UserController {
         dto.setPassword(password);
         dto.setClassId(classId);
 
-        userServer.signIn(dto, file);
+        userService.signIn(dto, file);
         return Result.success("注册成功");
     }
 
@@ -105,7 +99,7 @@ public class UserController {
     @ApiOperationSupport(author = "陈嘉豪")
     public Map<String, String> login(@Validated @RequestBody LoginRequestUserDTO loginRequestUserDTO) {
         // 调用服务层获取token
-        String token = userServer.login(loginRequestUserDTO);
+        String token = userService.login(loginRequestUserDTO);
         // 构建返回结果（包含token）
         Map<String, String> result = new HashMap<>();
         result.put("token", token);
@@ -143,7 +137,7 @@ public class UserController {
     @ApiOperationSupport(author = "陈嘉豪")
     public Result rePassword(@RequestBody UserRePasswordDTO userRePasswordDTO) {
         log.info("用户{}尝试修改密码", BaseContext.getCurrentId());
-        userServer.rePassword(userRePasswordDTO);
+        userService.rePassword(userRePasswordDTO);
         log.info("用户{}修改密码成功", BaseContext.getCurrentId());
         return Result.success("修改成功", null);
     }

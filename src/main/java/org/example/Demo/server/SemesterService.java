@@ -7,7 +7,7 @@ import org.example.Demo.DTO.Semester.ListSemesterDTO;
 import org.example.Demo.DTO.Semester.UpdateSemesterDTO;
 import org.example.Demo.VO.Semester.semesterListAllVO;
 
-public interface SemesterServer {
+public interface SemesterService {
     void addSemester(AddSemesterDTO addSemesterDTO);
 
     PageResult<semesterListAllVO> listSemester(ListSemesterDTO listSemesterDTO);

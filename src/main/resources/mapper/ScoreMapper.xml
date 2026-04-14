@@ -132,10 +132,13 @@
     <select id="getClassAverageScore" resultType="org.example.Demo.VO.Score.ClassAvgVO">
         SELECT
         c.class_name AS className,
-        AVG(s.score) AS avgScore
-        FROM classes c
-        LEFT JOIN `user` stu ON c.id = stu.class_id AND stu.user_type_enum = 'STUDENT'
-        LEFT JOIN score s ON stu.id = s.student_id
+        AVG(s.score) AS avgScore,
+        MAX(s.score) AS maxScore,
+        MIN(s.score) AS minScore
+        FROM score s
+        JOIN `user` u ON s.student_id = u.id
+        JOIN classes c ON u.class_id = c.id
+        WHERE u.user_type_enum = 'STUDENT'
         GROUP BY c.id, c.class_name
         ORDER BY avgScore DESC
     </select>

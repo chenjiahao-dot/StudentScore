@@ -39,7 +39,6 @@ public class JwtUtil {
     public String generateToken(Long userId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
-
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date())
@@ -48,6 +47,19 @@ public class JwtUtil {
                 .compact();
     }
 
+
+    public String generateToken(Long userId, long expireHours) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
+        // 计算过期毫秒数：expireHours * 3600秒 * 1000毫秒
+        long expireMs = expireHours * 3600 * 1000;
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expireMs))
+                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes(StandardCharsets.UTF_8))
+                .compact();
+    }
     /**
      * 从Token中提取用户ID
      */

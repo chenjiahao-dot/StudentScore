@@ -1,14 +1,18 @@
-package org.example.Demo.Token;
+package org.example.Demo.Interceptor;
 
 import com.common.Context.BaseContext;
 import com.common.Util.JwtUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.Demo.server.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.util.Arrays;
+import java.util.List;
 
 // 1. 定义拦截器
 @Component
@@ -17,6 +21,9 @@ public class LoginInterceptor implements HandlerInterceptor {
     private JwtUtil jwtUtil;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private PermissionService permissionService;
+
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -40,6 +47,13 @@ public class LoginInterceptor implements HandlerInterceptor {
         Long userId = jwtUtil.parseToken(token);
         BaseContext.setCurrentId(userId);
 
+        String roleKey = "login:role:" + token;
+        String role = stringRedisTemplate.opsForValue().get(roleKey);
+        if (role == null) {
+            response.setStatus(401);
+            response.getWriter().write("登录状态异常，请重新登录");
+            return false;
+        }
         return true;
     }
 

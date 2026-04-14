@@ -18,7 +18,7 @@ import org.example.Demo.entity.Semester;
 import org.example.Demo.enummerate.OrderTypeEnum;
 import org.example.Demo.enummerate.UserTypeEnum;
 import org.example.Demo.mapper.SemesterMapper;
-import org.example.Demo.server.SemesterServer;
+import org.example.Demo.server.SemesterService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +28,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class SemesterImpl implements SemesterServer {
+public class SemesterServiceImpl implements SemesterService {
     private final SemesterMapper semesterMapper;
 
     /**

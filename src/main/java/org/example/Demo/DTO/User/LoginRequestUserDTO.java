@@ -2,6 +2,7 @@ package org.example.Demo.DTO.User;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
@@ -24,4 +25,6 @@ public class LoginRequestUserDTO {
     @NotBlank(message = "密码不能为空")
     @Length(min = 6, max = 20, message = "密码长度必须为6-20位")
     private String password; // 必选
+    @Schema(description = "是否记住")
+    private Boolean rememberMe;
 }
