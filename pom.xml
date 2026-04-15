@@ -268,6 +268,7 @@
                 </configuration>
             </plugin>
         </plugins>
+         <finalName>school</finalName>
     </build>
 
 </project>
